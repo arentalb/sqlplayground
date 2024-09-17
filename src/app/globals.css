@@ -99,6 +99,11 @@ body {
   }
 }
 
+.transparent-bottom{
+  object-fit: cover;
+  /*-webkit-mask-image: linear-gradient(to top, transparent 5%, black 50%);*/
+  mask-image: linear-gradient(to top, transparent 5%, black 50%);
+}
 
 @layer base {
   * {

@@ -13,6 +13,7 @@
     "@lucia-auth/adapter-prisma": "^4.0.1",
     "@prisma/client": "^5.19.1",
     "@radix-ui/react-icons": "^1.3.0",
+    "@radix-ui/react-slot": "^1.1.0",
     "@types/bcrypt": "^5.0.2",
     "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.0",
