@@ -1,6 +1,4 @@
 "use client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -11,9 +9,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { SignInFormData, SignInFormSchema } from "@/lib/schemas";
+import { useForm } from "react-hook-form";
+import { signIn } from "@/actions/auth.action";
+import { handleResponse } from "@/lib/response";
 
 export default function SignInForm() {
+  const { toast } = useToast();
+
   const form = useForm<SignInFormData>({
     resolver: zodResolver(SignInFormSchema),
     defaultValues: {
@@ -22,9 +27,26 @@ export default function SignInForm() {
     },
   });
 
-  function onSubmit(values: SignInFormData) {
+  async function onSubmit(values: SignInFormData) {
     console.log(values);
+    const response = await signIn(values);
+
+    handleResponse(response, {
+      onSuccess: (data) => {
+        toast({
+          title: `Sign-up successful! ${data ?? ""}`,
+          variant: "default",
+        });
+      },
+      onError: (message) => {
+        toast({
+          title: message,
+          variant: "destructive",
+        });
+      },
+    });
   }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">

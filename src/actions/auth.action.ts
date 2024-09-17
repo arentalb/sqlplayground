@@ -61,14 +61,14 @@ export async function signIn(user: SignInFormData) {
   });
 
   if (!checkedUser) {
-    throw Error("User dose not exists ");
+    return createErrorResponse("User dose not exists");
   }
   const validPassword = await bcrypt.compare(
     user.password,
     checkedUser.password,
   );
   if (!validPassword) {
-    throw Error("Wrong password");
+    return createErrorResponse("Wrong password");
   }
 
   const session = await lucia.createSession(checkedUser.id, {});
