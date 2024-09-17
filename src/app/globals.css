@@ -7,6 +7,11 @@
   --foreground: #171717;
 }
 
+.dark {
+  --background: 224 71.4% 4.1%;
+  --foreground: 210 20% 98%;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -25,6 +30,17 @@ body {
     text-wrap: balance;
   }
 }
+
+body {
+  background: #ffffff; /* Fallback for light theme */
+  color: #171717; /* Fallback for light theme */
+}
+
+.dark body {
+  background: #0a0a0a; /* Fallback for dark theme */
+  color: #ededed; /* Fallback for dark theme */
+}
+
 
 @layer base {
   :root {
