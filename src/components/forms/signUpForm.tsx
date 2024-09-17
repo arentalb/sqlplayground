@@ -12,8 +12,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { SignUpFormData, SignUpFormSchema } from "@/lib/schemas";
+import { signUp } from "@/actions/auth.action";
+import { useToast } from "@/hooks/use-toast";
+import { handleResponse } from "@/lib/response";
 
 export default function SignUpForm() {
+  const { toast } = useToast();
+
   const form = useForm<SignUpFormData>({
     resolver: zodResolver(SignUpFormSchema),
     defaultValues: {
@@ -23,8 +28,23 @@ export default function SignUpForm() {
     },
   });
 
-  function onSubmit(values: SignUpFormData) {
-    console.log(values);
+  async function onSubmit(values: SignUpFormData) {
+    const response = await signUp(values);
+
+    handleResponse(response, {
+      onSuccess: (data) => {
+        toast({
+          title: `Sign-up successful! ${data ?? ""}`,
+          variant: "default",
+        });
+      },
+      onError: (message) => {
+        toast({
+          title: message,
+          variant: "destructive",
+        });
+      },
+    });
   }
   return (
     <Form {...form}>

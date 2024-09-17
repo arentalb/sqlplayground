@@ -11,6 +11,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { lucia } from "@/lib/auth/lucia";
 import { getAuth } from "@/lib/auth/getAuth";
+import { createErrorResponse } from "@/lib/response";
 
 enum Role {
   User = "user",
@@ -21,11 +22,10 @@ export async function signUp(user: SignUpFormData) {
   const validatedFields = SignUpFormSchema.safeParse(user);
 
   if (!validatedFields.success) {
-    throw Error("Validation error ");
+    return createErrorResponse("Validation error");
   }
 
   const validatedUser = validatedFields.data;
-
   try {
     const hashedPassword = await bcrypt.hash(validatedUser.password, 10);
     const createdUser = await db.user.create({
@@ -47,12 +47,11 @@ export async function signUp(user: SignUpFormData) {
     );
   } catch (error: any) {
     if (error.code === "P2002") {
-      throw Error("User already exists ");
+      return createErrorResponse("User already exists");
     } else {
-      throw Error("Failed to create user");
+      return createErrorResponse("Failed to create user");
     }
   }
-
   redirect("/");
 }
 
