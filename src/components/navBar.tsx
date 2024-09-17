@@ -6,7 +6,9 @@ import Image from "next/image";
 export default function NavBar() {
   return (
     <div
-      className={"flex justify-between items-center px-8 py-4 drop-shadow-2xl"}
+      className={
+        "flex justify-between items-center md:px-10 w-full max-w-[1400px] mx-auto py-4 drop-shadow-2xl"
+      }
     >
       <Logo />
       <ul className={" gap-4 hidden md:flex"}>
