@@ -7,6 +7,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <NavBar />
+      <div className="absolute top-0 z-[-2] h-screen w-screen bg-neutral-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
       <div className="flex flex-col items-center justify-center mt-24 md:mt-16 px-4 sm:px-6 md:px-12 lg:px-24">
         <h1 className="text-4xl sm:text-5xl md:text-6xl max-w-3xl font-bold bg-gradient-to-l from-violet-400 to-violet-700 inline-block text-transparent bg-clip-text text-center mb-4">
           Transform Your SQL Skills with Live Projects
