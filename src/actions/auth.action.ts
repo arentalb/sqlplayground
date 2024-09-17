@@ -71,15 +71,18 @@ export async function signIn(user: SignInFormData) {
     return createErrorResponse("Wrong password");
   }
 
-  const session = await lucia.createSession(checkedUser.id, {});
-  const sessionCookie = lucia.createSessionCookie(session.id);
+  try {
+    const session = await lucia.createSession(checkedUser.id, {});
+    const sessionCookie = lucia.createSessionCookie(session.id);
 
-  cookies().set(
-    sessionCookie.name,
-    sessionCookie.value,
-    sessionCookie.attributes,
-  );
-
+    cookies().set(
+      sessionCookie.name,
+      sessionCookie.value,
+      sessionCookie.attributes,
+    );
+  } catch (error) {
+    return createErrorResponse("Failed to login user");
+  }
   redirect("/");
 }
 
@@ -90,15 +93,20 @@ export const signOut = async () => {
     redirect("/signin");
   }
 
-  await lucia.invalidateSession(session.id);
+  console.log("in signout ");
+  try {
+    await lucia.invalidateSession(session.id);
 
-  const sessionCookie = lucia.createBlankSessionCookie();
+    const sessionCookie = lucia.createBlankSessionCookie();
 
-  cookies().set(
-    sessionCookie.name,
-    sessionCookie.value,
-    sessionCookie.attributes,
-  );
+    cookies().set(
+      sessionCookie.name,
+      sessionCookie.value,
+      sessionCookie.attributes,
+    );
+  } catch (error) {
+    return createErrorResponse("Failed to logout user");
+  }
 
   redirect("/signin");
 };

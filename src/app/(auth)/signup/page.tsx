@@ -1,7 +1,13 @@
 import SignUpForm from "@/components/forms/signUpForm";
 import NavBar from "@/components/navBar";
+import { getAuth } from "@/lib/auth/getAuth";
+import { redirect } from "next/navigation";
 
-export default function Page() {
+export default async function Page() {
+  const { user } = await getAuth();
+  if (user) {
+    redirect("/");
+  }
   return (
     <div className="flex flex-col min-h-screen ">
       <NavBar />

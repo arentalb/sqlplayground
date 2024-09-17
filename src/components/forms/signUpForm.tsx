@@ -15,10 +15,11 @@ import { SignUpFormData, SignUpFormSchema } from "@/lib/schemas";
 import { signUp } from "@/actions/auth.action";
 import { useToast } from "@/hooks/use-toast";
 import { handleResponse } from "@/lib/response";
+import { useAuth } from "@/lib/auth/authProvider";
 
 export default function SignUpForm() {
   const { toast } = useToast();
-
+  const { refreshUser } = useAuth();
   const form = useForm<SignUpFormData>({
     resolver: zodResolver(SignUpFormSchema),
     defaultValues: {
@@ -37,6 +38,7 @@ export default function SignUpForm() {
           title: `Sign-up successful! ${data ?? ""}`,
           variant: "default",
         });
+        refreshUser();
       },
       onError: (message) => {
         toast({
@@ -101,7 +103,7 @@ export default function SignUpForm() {
           )}
         />
         <Button type="submit" className={"w-full h-12"}>
-          Submit
+          Sign Up
         </Button>
       </form>
     </Form>

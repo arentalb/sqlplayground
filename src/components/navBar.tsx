@@ -2,8 +2,11 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
+import { useAuth } from "@/lib/auth/authProvider";
+import SignOutForm from "@/components/forms/signOutForm";
 
 export default function NavBar() {
+  const { user } = useAuth();
   return (
     <div
       className={
@@ -12,16 +15,24 @@ export default function NavBar() {
     >
       <Logo />
       <ul className={" gap-4 hidden md:flex"}>
-        <li>
-          <Button asChild>
-            <Link href={"/signup"}>SIGN UP</Link>
-          </Button>
-        </li>
-        <li>
-          <Button asChild>
-            <Link href={"/signin"}>SIGN IN</Link>
-          </Button>
-        </li>
+        {!user ? (
+          <>
+            <li>
+              <Button asChild>
+                <Link href={"/signup"}>SIGN UP</Link>
+              </Button>
+            </li>
+            <li>
+              <Button asChild>
+                <Link href={"/signin"}>SIGN IN</Link>
+              </Button>
+            </li>
+          </>
+        ) : (
+          <li>
+            <SignOutForm />
+          </li>
+        )}
       </ul>
     </div>
   );

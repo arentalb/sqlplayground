@@ -15,9 +15,11 @@ import { SignInFormData, SignInFormSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
 import { signIn } from "@/actions/auth.action";
 import { handleResponse } from "@/lib/response";
+import { useAuth } from "@/lib/auth/authProvider";
 
 export default function SignInForm() {
   const { toast } = useToast();
+  const { refreshUser } = useAuth();
 
   const form = useForm<SignInFormData>({
     resolver: zodResolver(SignInFormSchema),
@@ -28,15 +30,15 @@ export default function SignInForm() {
   });
 
   async function onSubmit(values: SignInFormData) {
-    console.log(values);
     const response = await signIn(values);
 
     handleResponse(response, {
       onSuccess: (data) => {
         toast({
-          title: `Sign-up successful! ${data ?? ""}`,
+          title: `Sign-In successful! ${data ?? ""}`,
           variant: "default",
         });
+        refreshUser();
       },
       onError: (message) => {
         toast({
@@ -87,7 +89,7 @@ export default function SignInForm() {
           )}
         />
         <Button type="submit" className={"w-full h-12"}>
-          Submit
+          Sign In
         </Button>
       </form>
     </Form>
