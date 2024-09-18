@@ -9,6 +9,7 @@ interface NavLinkProp {
   icon: React.ReactNode;
   classname?: string;
 }
+
 export default function NavLink({ href, text, icon, classname }: NavLinkProp) {
   const pathname = usePathname();
   const isActive = pathname === href;
@@ -17,7 +18,7 @@ export default function NavLink({ href, text, icon, classname }: NavLinkProp) {
     <Link
       href={href}
       className={cn(
-        "flex  font-semibold  px-4 py-2 bg-gray-900/50 hover:bg-gray-900/70 rounded-md gap-4",
+        "flex border font-semibold px-4 py-2 bg-gray-100 hover:bg-gray-200 inset-0 dark:bg-gray-900/50 dark:hover:bg-gray-900/70 rounded-md gap-4 box-border", // Add box-border here
         classname,
         isActive ? "border border-violet-500" : "",
       )}
