@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth/authProvider";
 import SignOutForm from "@/components/forms/signOutForm";
-import Logo from "@/components/logo";
+import Logo, { LOGO_SIZE } from "@/components/logo";
 
 export default function NavBar() {
   const { user } = useAuth();
@@ -13,7 +13,7 @@ export default function NavBar() {
         "flex justify-between items-center md:px-10 w-full max-w-[1400px] mx-auto py-4 drop-shadow-2xl"
       }
     >
-      <Logo />
+      <Logo size={LOGO_SIZE.BIG} />
       <ul className={" gap-4 hidden md:flex"}>
         {!user ? (
           <>

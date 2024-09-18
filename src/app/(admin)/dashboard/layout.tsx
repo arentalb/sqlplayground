@@ -1,7 +1,7 @@
 import { getAuth } from "@/lib/auth/getAuth";
 import { redirect } from "next/navigation";
-import SideNav from "@/app/(admin)/_components/sideNav";
 import TopNav from "@/app/(admin)/_components/topNav";
+import SideNav from "@/app/(admin)/_components/sideNav";
 
 export default async function Layout({
   children,
@@ -13,12 +13,12 @@ export default async function Layout({
   if (!user) {
     redirect("/");
   }
+
   return (
-    <div className={"max-h-screen h-screen gap-2 flex"}>
-      <div className={"w-1/6 "}>
-        <SideNav />
-      </div>
-      <div className={"w-5/6 border-l border-l-violet-500/20"}>
+    <div className="overflow-visible max-h-screen h-screen gap-2 flex relative">
+      <SideNav />
+
+      <div className="w-full border-l border-l-violet-500/20 relative ">
         <TopNav />
         <div>{children}</div>
       </div>
