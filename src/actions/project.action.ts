@@ -44,3 +44,19 @@ export async function createProject(project: CreateProjectData) {
     return createErrorResponse("Failed to create project");
   }
 }
+
+export async function getAllMyProjects() {
+  const { user } = await getAuth();
+  if (!user || !user.id) {
+    return null;
+  }
+  try {
+    return await db.project.findMany({
+      where: {
+        owner_id: user.id,
+      },
+    });
+  } catch (error) {
+    return null;
+  }
+}

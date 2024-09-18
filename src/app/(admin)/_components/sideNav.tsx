@@ -21,7 +21,7 @@ export default function SideNav() {
       <div className="flex  items-center justify-between">
         <Logo size={!isOpen ? LOGO_SIZE.SMALL : LOGO_SIZE.BIG} />
       </div>
-      <ul className="flex flex-col h-full mt-8 gap-4">
+      <ul className="flex w-full flex-col h-full mt-8 gap-4">
         <li>
           <NavLink
             href={"/dashboard"}
