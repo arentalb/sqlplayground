@@ -105,6 +105,9 @@ body {
   mask-image: linear-gradient(to top, transparent 5%, black 50%);
 }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
 @layer base {
   * {
     @apply border-border;

@@ -52,7 +52,7 @@ export async function signUp(user: SignUpFormData) {
       return createErrorResponse("Failed to create user");
     }
   }
-  redirect("/");
+  redirect("/dashboard");
 }
 
 export async function signIn(user: SignInFormData) {
@@ -83,7 +83,7 @@ export async function signIn(user: SignInFormData) {
   } catch (error) {
     return createErrorResponse("Failed to login user");
   }
-  redirect("/");
+  redirect("/dashboard");
 }
 
 export const signOut = async () => {

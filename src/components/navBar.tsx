@@ -1,9 +1,9 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Image from "next/image";
 import { useAuth } from "@/lib/auth/authProvider";
 import SignOutForm from "@/components/forms/signOutForm";
+import Logo from "@/components/logo";
 
 export default function NavBar() {
   const { user } = useAuth();
@@ -34,13 +34,6 @@ export default function NavBar() {
           </li>
         )}
       </ul>
-    </div>
-  );
-}
-function Logo() {
-  return (
-    <div>
-      <Image src={"logo-full.svg"} alt={"Logo"} width={150} height={100} />
     </div>
   );
 }
