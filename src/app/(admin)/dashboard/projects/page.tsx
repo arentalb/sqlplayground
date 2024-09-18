@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button";
+import CreateProjectDialog from "@/app/(admin)/dashboard/projects/_components/createProjectDialog";
 
 export default function Page() {
   return (
     <div className={"px-10 py-6"}>
       <div className={" py-2"}>
-        <Button>Create New Project </Button>
+        <CreateProjectDialog />
       </div>
       <div
         className={

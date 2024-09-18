@@ -27,3 +27,14 @@ export const SignInFormSchema = z.object({
     .min(8, { message: "Password must be at least 8 characters long" })
     .max(50, { message: "Password must be at most 50 characters long" }),
 });
+
+export const CreateProjectSchema = z.object({
+  title: z.string().min(1, { message: "Title is required" }),
+  description: z.string().min(1, { message: "Description is required" }),
+  database_name: z
+    .string()
+    .min(1, { message: "Database name is required" })
+    .regex(/^[^\s]+$/, { message: "Database name cannot include spaces" }),
+});
+
+export type CreateProjectData = z.infer<typeof CreateProjectSchema>;
