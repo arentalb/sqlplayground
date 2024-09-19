@@ -60,3 +60,25 @@ export async function getAllMyProjects() {
     return null;
   }
 }
+
+export async function getProjectById(id: string) {
+  const { user } = await getAuth();
+  if (!user || !user.id) {
+    return null;
+  }
+
+  try {
+    const foundedProject = await db.project.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (foundedProject?.owner_id === user.id) {
+      return foundedProject;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    return null;
+  }
+}

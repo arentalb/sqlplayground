@@ -18,9 +18,9 @@ export default async function Layout({
     <div className="overflow-visible max-h-screen h-screen gap-2 flex relative">
       <SideNav />
 
-      <div className="w-full border-l border-l-violet-500/20 relative ">
+      <div className="w-full h-full flex flex-col border-l border-l-violet-500/20 relative ">
         <TopNav />
-        <div>{children}</div>
+        {children}
       </div>
     </div>
   );
