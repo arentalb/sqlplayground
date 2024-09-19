@@ -5,6 +5,7 @@ import {
   disconnectTenantPrismaClient,
   getTenantPrismaClient,
 } from "@/lib/tenant";
+import { formatPostgresErrorText } from "@/lib/utils";
 
 export async function connectToTenantDatabase(databaseName: string) {
   try {
@@ -36,9 +37,14 @@ export async function executeTenantDatabaseQuery(
       return { error: "No connection found" };
     }
     const result = await prisma.$queryRawUnsafe(query);
-    return { success: true, result };
+    return { success: true, result: JSON.stringify(result) };
   } catch (error) {
-    console.error("Error executing query:", error);
-    return { error: "Failed to execute query" };
+    const updatedError = {
+      // @ts-expect-error "i know what field it returns"
+      message: error?.meta?.message,
+      // @ts-expect-error "i know what field it returns"
+      code: error?.meta?.code,
+    };
+    return { error: formatPostgresErrorText(updatedError) };
   }
 }

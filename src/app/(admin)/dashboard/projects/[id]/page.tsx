@@ -14,7 +14,7 @@ import {
 export default function Page({ params }: { params: { id: string } }) {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<any>(null);
   const [connectionStatus, setConnectionStatus] = useState<boolean>(false);
   const [project, setProject] = useState<Project | null>(null);
 
@@ -64,6 +64,7 @@ export default function Page({ params }: { params: { id: string } }) {
           setError(null);
         }
         if (data.error) {
+          console.log(data);
           setError(data.error);
         }
       } catch (error) {
@@ -71,6 +72,7 @@ export default function Page({ params }: { params: { id: string } }) {
       }
     }
   };
+
   return (
     <div className="px-10 py-6 h-full flex flex-col">
       <div className="flex gap-4 justify-between border-b pb-4">
@@ -108,7 +110,7 @@ export default function Page({ params }: { params: { id: string } }) {
         <Textarea
           className="h-1/2"
           readOnly
-          value={error ? error : JSON.stringify(result) || ""}
+          value={error ? error : result || ""}
         />
       </div>
     </div>
