@@ -53,3 +53,6 @@ export const convertToUpperCase = (query: string) => {
   const regex = new RegExp(`\\b(${sqlKeywords.join("|")})\\b`, "gi");
   return query.replace(regex, (match) => match.toUpperCase());
 };
+
+export const delay = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));

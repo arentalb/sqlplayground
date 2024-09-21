@@ -1,43 +1,24 @@
 "use client";
-import { useMutation, useQuery } from "react-query";
-import { Project } from "@prisma/client";
+import { useMutation } from "react-query";
 import {
   connectToTenantDatabase,
   disconnectFromTenantDatabase,
-  isConnectionAlive,
 } from "@/actions/database.action";
-import { Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
 import useDatabaseStore from "@/stores/databaseStore";
+import { Loader } from "lucide-react";
 
-interface DatabaseHeaderProps {
-  project: Project;
-}
-
-export default function DatabaseHeader({ project }: DatabaseHeaderProps) {
+export default function DatabaseHeader() {
   const {
     connectionStatus,
     connectionLoading,
     setConnectionStatus,
     setConnectionLoading,
-    setProject,
-    setQuery,
+    project,
   } = useDatabaseStore();
 
-  const { refetch: checkConnectionStatus } = useQuery(
-    ["isConnectionAlive", project.database_name],
-    () => isConnectionAlive(project.database_name),
-    {
-      enabled: !!project.database_name,
-      onSuccess: (res) => setConnectionStatus(res),
-      onError: () => setConnectionStatus(false),
-      refetchOnWindowFocus: false,
-    },
-  );
-
   const connectMutation = useMutation(
-    () => connectToTenantDatabase(project.database_name),
+    () => connectToTenantDatabase(project?.database_name || ""),
     {
       onMutate: () => setConnectionLoading(true),
       onSuccess: (data) => {
@@ -57,7 +38,7 @@ export default function DatabaseHeader({ project }: DatabaseHeaderProps) {
   );
 
   const disconnectMutation = useMutation(
-    () => disconnectFromTenantDatabase(project.database_name),
+    () => disconnectFromTenantDatabase(project?.database_name || ""),
     {
       onMutate: () => setConnectionLoading(true),
       onSuccess: () => {
@@ -74,23 +55,6 @@ export default function DatabaseHeader({ project }: DatabaseHeaderProps) {
 
   const handleConnect = () => connectMutation.mutate();
   const handleDisConnect = () => disconnectMutation.mutate();
-  useEffect(() => {
-    setProject(project);
-    checkConnectionStatus();
-
-    return () => {
-      disconnectFromTenantDatabase(project.database_name).then((r) => () => {});
-      setProject(null);
-      setQuery("");
-      setConnectionStatus(false);
-    };
-  }, [
-    project,
-    setProject,
-    checkConnectionStatus,
-    setQuery,
-    setConnectionStatus,
-  ]);
 
   return (
     <div className="flex gap-4 justify-between border-b pb-4">
@@ -106,16 +70,21 @@ export default function DatabaseHeader({ project }: DatabaseHeaderProps) {
       </div>
 
       <div className="flex gap-4 items-center">
-        {connectionLoading ? (
-          <Loader />
-        ) : (
-          <div
-            className={`p-2 ${connectionStatus ? "bg-green-600" : "bg-red-600"} w-4 h-4 rounded-full`}
-          />
-        )}
-
-        <Button onClick={connectionStatus ? handleDisConnect : handleConnect}>
-          {connectionStatus ? "Disconnect" : "Connect"}
+        <div
+          className={`p-2 ${connectionStatus ? "bg-green-600" : "bg-red-600"} w-4 h-4 rounded-full`}
+        />
+        <Button
+          className={"w-40"}
+          onClick={connectionStatus ? handleDisConnect : handleConnect}
+          disabled={connectionLoading}
+        >
+          {connectionLoading ? (
+            <Loader className={"animate-spin"} />
+          ) : connectionStatus ? (
+            "Disconnect"
+          ) : (
+            "Connect"
+          )}
         </Button>
       </div>
     </div>

@@ -6,10 +6,11 @@ import {
   disconnectTenantPrismaClient,
   getTenantPrismaClient,
 } from "@/lib/tenant";
-import { formatPostgresErrorText } from "@/lib/utils";
+import { delay, formatPostgresErrorText } from "@/lib/utils";
 
 export async function connectToTenantDatabase(databaseName: string) {
   try {
+    await delay(1000);
     await createTenantPrismaClient(databaseName);
     return { message: "Connected successfully" };
   } catch (error) {
@@ -20,6 +21,7 @@ export async function connectToTenantDatabase(databaseName: string) {
 
 export async function disconnectFromTenantDatabase(databaseName: string) {
   try {
+    await delay(1000);
     await disconnectTenantPrismaClient(databaseName);
     return { message: "Disconnected successfully" };
   } catch (error) {
@@ -51,8 +53,5 @@ export async function executeTenantDatabaseQuery(
 }
 
 export async function isConnectionAlive(databaseName: string) {
-  console.log("is connection alive ");
-  console.log(databaseName);
-  console.log(checkAvailabilityTenantPrismaClient(databaseName));
   return checkAvailabilityTenantPrismaClient(databaseName);
 }

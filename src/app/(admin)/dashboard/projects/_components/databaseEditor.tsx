@@ -9,29 +9,24 @@ import { Textarea } from "@/components/ui/textarea";
 import { Code, Highlighter, Play } from "lucide-react";
 import { useTheme } from "next-themes";
 import { convertToUpperCase } from "@/lib/utils";
-import { Project } from "@prisma/client";
 import { useMutation } from "react-query";
 import { executeTenantDatabaseQuery } from "@/actions/database.action";
 import useDatabaseStore from "@/stores/databaseStore";
 
-interface DatabaseEditorProps {
-  project: Project;
-}
-
-export default function DatabaseEditor({ project }: DatabaseEditorProps) {
+export default function DatabaseEditor() {
   const { theme } = useTheme();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isEditor, setIsEditor] = useState<boolean>(true);
+  const [highlightedCode, setHighlightedCode] = useState<string>("");
 
   const {
     query,
-    highlightedCode,
     connectionStatus,
     connectionLoading,
     setQuery,
-    setHighlightedCode,
     setError,
     setResult,
+    project,
   } = useDatabaseStore();
 
   const mutation = useMutation(
@@ -71,7 +66,6 @@ export default function DatabaseEditor({ project }: DatabaseEditorProps) {
       mutation.mutate(project.database_name);
     }
   };
-
   useEffect(() => {
     setHighlightedCode(query);
   }, [query, setHighlightedCode]);

@@ -32,7 +32,6 @@ export function getTenantPrismaClient(dbName: string): PrismaClient | null {
 }
 
 export function checkAvailabilityTenantPrismaClient(dbName: string): boolean {
-  logTenantPrismaClients();
   return !!clients[dbName];
 }
 
