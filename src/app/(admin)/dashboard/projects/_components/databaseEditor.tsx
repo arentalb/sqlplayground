@@ -10,8 +10,9 @@ import { Code, Highlighter, Play } from "lucide-react";
 import { useTheme } from "next-themes";
 import { convertToUpperCase } from "@/lib/utils";
 import { Project } from "@prisma/client";
-import { useDatabaseContext } from "@/app/(admin)/dashboard/projects/_components/databaseProvider";
+import { useMutation } from "react-query";
 import { executeTenantDatabaseQuery } from "@/actions/database.action";
+import useDatabaseStore from "@/stores/databaseStore";
 
 interface DatabaseEditorProps {
   project: Project;
@@ -19,35 +20,44 @@ interface DatabaseEditorProps {
 
 export default function DatabaseEditor({ project }: DatabaseEditorProps) {
   const { theme } = useTheme();
-  const [query, setQuery] = useState<string>("");
-  const [highlightedCode, setHighlightedCode] = useState<string>(query);
-  const [isEditor, setIsEditor] = useState<boolean>(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { connectionStatus, connectionLoading, setError, setResult } =
-    useDatabaseContext();
+  const [isEditor, setIsEditor] = useState<boolean>(true);
 
-  async function handleQueryRun(dbName: string, query: string) {
-    try {
-      const data = await executeTenantDatabaseQuery(dbName, query);
+  const {
+    query,
+    highlightedCode,
+    connectionStatus,
+    connectionLoading,
+    setQuery,
+    setHighlightedCode,
+    setError,
+    setResult,
+  } = useDatabaseStore();
 
-      if (data.success) {
-        setResult(data.result);
-        setError(null);
-      }
-      if (data.error) {
-        setResult(null);
-        setError(data.error);
-      }
-    } catch (error) {
-      setError("Failed to connect");
-    }
-  }
+  const mutation = useMutation(
+    (dbName: string) => executeTenantDatabaseQuery(dbName, query),
+    {
+      onSuccess: (data) => {
+        if (data.success) {
+          setResult(data.result);
+          setError(null);
+        } else {
+          setError(data.error);
+          setResult(null);
+        }
+      },
+      onError: () => {
+        setError("Failed to connect");
+      },
+    },
+  );
 
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const input = e.target.value;
     const cursorPosition = e.target.selectionStart;
     const transformedInput = convertToUpperCase(input);
     setQuery(transformedInput);
+
     setTimeout(() => {
       if (textareaRef.current) {
         textareaRef.current.selectionStart = cursorPosition;
@@ -56,9 +66,15 @@ export default function DatabaseEditor({ project }: DatabaseEditorProps) {
     }, 0);
   };
 
+  const handleQueryRun = () => {
+    if (project?.database_name && query) {
+      mutation.mutate(project.database_name);
+    }
+  };
+
   useEffect(() => {
     setHighlightedCode(query);
-  }, [query]);
+  }, [query, setHighlightedCode]);
 
   return (
     <div className="w-full relative rounded-xl h-60">
@@ -68,9 +84,7 @@ export default function DatabaseEditor({ project }: DatabaseEditorProps) {
             {isEditor && query.length !== 0 && (
               <div className="flex gap-2">
                 <Highlighter onClick={() => setIsEditor(false)} />
-                <Play
-                  onClick={() => handleQueryRun(project.database_name, query)}
-                />
+                <Play onClick={handleQueryRun} />
               </div>
             )}
           </div>
@@ -87,9 +101,7 @@ export default function DatabaseEditor({ project }: DatabaseEditorProps) {
         <div className="relative w-full h-full rounded-xl">
           <div className="absolute right-4 top-4 flex gap-2 z-10">
             {!isEditor && <Code onClick={() => setIsEditor(true)} />}
-            <Play
-              onClick={() => handleQueryRun(project.database_name, query)}
-            />
+            <Play onClick={handleQueryRun} />
           </div>
           <div className="w-full h-full border rounded-md overflow-hidden py-2">
             <SyntaxHighlighter

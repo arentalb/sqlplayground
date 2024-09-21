@@ -1,14 +1,15 @@
 "use client";
-import React, { useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { useMutation, useQuery } from "react-query";
 import { Project } from "@prisma/client";
-import { Loader } from "lucide-react";
 import {
   connectToTenantDatabase,
   disconnectFromTenantDatabase,
   isConnectionAlive,
 } from "@/actions/database.action";
-import { useDatabaseContext } from "@/app/(admin)/dashboard/projects/_components/databaseProvider";
+import { Loader } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import useDatabaseStore from "@/stores/databaseStore";
 
 interface DatabaseHeaderProps {
   project: Project;
@@ -20,73 +21,76 @@ export default function DatabaseHeader({ project }: DatabaseHeaderProps) {
     connectionLoading,
     setConnectionStatus,
     setConnectionLoading,
-    clearDatabaseContext,
     setProject,
-  } = useDatabaseContext();
+    setQuery,
+  } = useDatabaseStore();
 
-  const handleConnect = async () => {
-    setConnectionLoading(true);
-    if (project) {
-      try {
-        const data = await connectToTenantDatabase(project.database_name);
+  const { refetch: checkConnectionStatus } = useQuery(
+    ["isConnectionAlive", project.database_name],
+    () => isConnectionAlive(project.database_name),
+    {
+      enabled: !!project.database_name,
+      onSuccess: (res) => setConnectionStatus(res),
+      onError: () => setConnectionStatus(false),
+      refetchOnWindowFocus: false,
+    },
+  );
+
+  const connectMutation = useMutation(
+    () => connectToTenantDatabase(project.database_name),
+    {
+      onMutate: () => setConnectionLoading(true),
+      onSuccess: (data) => {
         if (data.message) {
           setConnectionStatus(true);
-        }
-        if (data.error) {
+        } else {
           setConnectionStatus(false);
         }
-      } catch (error) {
-        console.error("Failed to connect:", error);
-      } finally {
-        setConnectionLoading(false);
-      }
-    }
-  };
-
-  const handleDisConnect = async () => {
-    setConnectionLoading(true);
-
-    if (project) {
-      try {
-        await disconnectFromTenantDatabase(project.database_name);
+      },
+      onError: () => {
         setConnectionStatus(false);
-      } catch (error) {
-        console.error("Failed to disconnect:", error);
-      } finally {
+      },
+      onSettled: () => {
         setConnectionLoading(false);
-      }
-    }
-  };
+      },
+    },
+  );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await isConnectionAlive(project.database_name);
-        setConnectionStatus(res);
-      } catch (error) {
-        console.error("Error checking connection status:", error);
+  const disconnectMutation = useMutation(
+    () => disconnectFromTenantDatabase(project.database_name),
+    {
+      onMutate: () => setConnectionLoading(true),
+      onSuccess: () => {
         setConnectionStatus(false);
-      } finally {
+      },
+      onError: () => {
+        setConnectionStatus(true);
+      },
+      onSettled: () => {
         setConnectionLoading(false);
-      }
-    };
+      },
+    },
+  );
 
-    if (project.database_name) {
-      fetchData();
-    }
-    return () => {
-      // clearDatabaseContext();
-      console.log("return from use effect ");
-    };
-  }, [
-    clearDatabaseContext,
-    project.database_name,
-    setConnectionLoading,
-    setConnectionStatus,
-  ]);
+  const handleConnect = () => connectMutation.mutate();
+  const handleDisConnect = () => disconnectMutation.mutate();
   useEffect(() => {
     setProject(project);
-  }, [project, setProject]);
+    checkConnectionStatus();
+
+    return () => {
+      disconnectFromTenantDatabase(project.database_name).then((r) => () => {});
+      setProject(null);
+      setQuery("");
+      setConnectionStatus(false);
+    };
+  }, [
+    project,
+    setProject,
+    checkConnectionStatus,
+    setQuery,
+    setConnectionStatus,
+  ]);
 
   return (
     <div className="flex gap-4 justify-between border-b pb-4">
@@ -106,9 +110,7 @@ export default function DatabaseHeader({ project }: DatabaseHeaderProps) {
           <Loader />
         ) : (
           <div
-            className={`p-2 ${
-              connectionStatus ? "bg-green-600" : "bg-red-600"
-            } w-4 h-4 rounded-full`}
+            className={`p-2 ${connectionStatus ? "bg-green-600" : "bg-red-600"} w-4 h-4 rounded-full`}
           />
         )}
 
