@@ -1,9 +1,16 @@
+// app/(admin)/dashboard/projects/_components/databaseTerminal.tsx
+"use client";
+import React, { useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import React from "react";
-import { useQueryContext } from "@/app/(admin)/dashboard/projects/_components/queryProvider";
+import { useDatabaseContext } from "@/app/(admin)/dashboard/projects/_components/databaseProvider";
 
 export default function DatabaseTerminal() {
-  const { error, result } = useQueryContext();
+  const { result, error, setError, setResult } = useDatabaseContext();
+
+  useEffect(() => {
+    setResult(null);
+    setError(null);
+  }, [setError, setResult]);
 
   return (
     <Textarea

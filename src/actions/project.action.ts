@@ -67,12 +67,20 @@ export async function getProjectById(id: string) {
     return null;
   }
 
+  // Delay helper function
+  const delay = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
+
   try {
+    // Introduce a delay before fetching the project
+    await delay(1000); // 1 second delay (you can adjust this time as needed)
+
     const foundedProject = await db.project.findUnique({
       where: {
         id: id,
       },
     });
+
     if (foundedProject?.owner_id === user.id) {
       return foundedProject;
     } else {

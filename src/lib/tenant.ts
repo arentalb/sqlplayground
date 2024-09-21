@@ -31,6 +31,11 @@ export function getTenantPrismaClient(dbName: string): PrismaClient | null {
   return clients[dbName] || null;
 }
 
+export function checkAvailabilityTenantPrismaClient(dbName: string): boolean {
+  logTenantPrismaClients();
+  return !!clients[dbName];
+}
+
 export function logTenantPrismaClients() {
   console.log("clients");
   const clientsData = Object.keys(clients);

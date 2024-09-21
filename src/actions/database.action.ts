@@ -1,6 +1,7 @@
 "use server";
 
 import {
+  checkAvailabilityTenantPrismaClient,
   createTenantPrismaClient,
   disconnectTenantPrismaClient,
   getTenantPrismaClient,
@@ -47,4 +48,11 @@ export async function executeTenantDatabaseQuery(
     };
     return { error: formatPostgresErrorText(updatedError) };
   }
+}
+
+export async function isConnectionAlive(databaseName: string) {
+  console.log("is connection alive ");
+  console.log(databaseName);
+  console.log(checkAvailabilityTenantPrismaClient(databaseName));
+  return checkAvailabilityTenantPrismaClient(databaseName);
 }

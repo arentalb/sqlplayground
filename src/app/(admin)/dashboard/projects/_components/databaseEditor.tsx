@@ -9,18 +9,41 @@ import { Textarea } from "@/components/ui/textarea";
 import { Code, Highlighter, Play } from "lucide-react";
 import { useTheme } from "next-themes";
 import { convertToUpperCase } from "@/lib/utils";
-import { useQueryContext } from "@/app/(admin)/dashboard/projects/_components/queryProvider";
+import { Project } from "@prisma/client";
+import { useDatabaseContext } from "@/app/(admin)/dashboard/projects/_components/databaseProvider";
+import { executeTenantDatabaseQuery } from "@/actions/database.action";
 
-export default function DatabaseEditor() {
-  const { query, setQuery, handleQueryRun } = useQueryContext();
+interface DatabaseEditorProps {
+  project: Project;
+}
 
+export default function DatabaseEditor({ project }: DatabaseEditorProps) {
   const { theme } = useTheme();
-
+  const [query, setQuery] = useState<string>("");
   const [highlightedCode, setHighlightedCode] = useState<string>(query);
   const [isEditor, setIsEditor] = useState<boolean>(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { connectionStatus, connectionLoading, setError, setResult } =
+    useDatabaseContext();
 
-  function handleInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
+  async function handleQueryRun(dbName: string, query: string) {
+    try {
+      const data = await executeTenantDatabaseQuery(dbName, query);
+
+      if (data.success) {
+        setResult(data.result);
+        setError(null);
+      }
+      if (data.error) {
+        setResult(null);
+        setError(data.error);
+      }
+    } catch (error) {
+      setError("Failed to connect");
+    }
+  }
+
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const input = e.target.value;
     const cursorPosition = e.target.selectionStart;
     const transformedInput = convertToUpperCase(input);
@@ -31,7 +54,7 @@ export default function DatabaseEditor() {
         textareaRef.current.selectionEnd = cursorPosition;
       }
     }, 0);
-  }
+  };
 
   useEffect(() => {
     setHighlightedCode(query);
@@ -45,11 +68,14 @@ export default function DatabaseEditor() {
             {isEditor && query.length !== 0 && (
               <div className="flex gap-2">
                 <Highlighter onClick={() => setIsEditor(false)} />
-                <Play onClick={() => handleQueryRun()} />
+                <Play
+                  onClick={() => handleQueryRun(project.database_name, query)}
+                />
               </div>
             )}
           </div>
           <Textarea
+            disabled={connectionLoading || !connectionStatus}
             ref={textareaRef}
             value={query}
             onChange={handleInput}
@@ -61,7 +87,9 @@ export default function DatabaseEditor() {
         <div className="relative w-full h-full rounded-xl">
           <div className="absolute right-4 top-4 flex gap-2 z-10">
             {!isEditor && <Code onClick={() => setIsEditor(true)} />}
-            <Play onClick={() => handleQueryRun()} />
+            <Play
+              onClick={() => handleQueryRun(project.database_name, query)}
+            />
           </div>
           <div className="w-full h-full border rounded-md overflow-hidden py-2">
             <SyntaxHighlighter
