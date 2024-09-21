@@ -33,18 +33,19 @@ model Session {
 }
 
 model Project {
-  id                     String   @id @default(cuid())
+  id                     String         @id @default(cuid())
   title                  String
   description            String
   database_name          String
   database_url           String
   owner_id               String
   cloned_from_project_id String?
-  clone_count            Int      @default(0)
-  created_at             DateTime @default(now())
-  updated_at             DateTime @updatedAt
+  clone_count            Int            @default(0)
+  created_at             DateTime       @default(now())
+  updated_at             DateTime       @updatedAt
   queries                Query[]
-  owner                  User     @relation(fields: [owner_id], references: [id])
+  owner                  User           @relation(fields: [owner_id], references: [id])
+  queryHistories         QueryHistory[]
 }
 
 model Query {
@@ -55,4 +56,19 @@ model Query {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   project    Project  @relation(fields: [project_id], references: [id])
+}
+
+enum QueryType {
+  ERROR
+  SUCCESS
+}
+
+model QueryHistory {
+  id         String    @id @default(cuid())
+  code       String
+  type       QueryType
+  project_id String
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  project    Project   @relation(fields: [project_id], references: [id])
 }
