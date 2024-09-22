@@ -8,6 +8,7 @@ import useDatabaseStore from "@/stores/databaseStore";
 import { useQuery } from "react-query";
 import { notFound } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import DatabaseHistory from "@/app/(admin)/dashboard/projects/_components/databaseHistory";
 
 interface PageProps {
   params: { id: string };
@@ -78,12 +79,18 @@ export default function Page({ params }: PageProps) {
   if (!project) {
     return notFound();
   }
+
   return (
-    <div className="px-10 py-6 h-full flex flex-col">
+    <div className="px-10 py-6 max-h-full h-full flex flex-col overflow-hidden">
       <DatabaseHeader />
-      <div className="pt-4 flex flex-col h-full gap-4">
-        <DatabaseEditor />
-        <DatabaseTerminal />
+      <div className="pt-4 flex max-h-full gap-4 overflow-hidden h-full">
+        <div className="flex flex-col gap-4  flex-grow  overflow-hidden px-px py-px ">
+          <DatabaseEditor />
+          <DatabaseTerminal />
+        </div>
+        <div className="w-1/3 flex-shrink-0 max-h-full h-full  overflow-y-auto">
+          <DatabaseHistory />
+        </div>
       </div>
     </div>
   );

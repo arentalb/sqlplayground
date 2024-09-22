@@ -12,6 +12,7 @@ import { redirect } from "next/navigation";
 import { lucia } from "@/lib/auth/lucia";
 import { getAuth } from "@/lib/auth/getAuth";
 import { createErrorResponse } from "@/lib/response";
+import { Prisma } from ".prisma/client";
 
 enum Role {
   User = "user",
@@ -45,8 +46,9 @@ export async function signUp(user: SignUpFormData) {
       sessionCookie.value,
       sessionCookie.attributes,
     );
-  } catch (error: any) {
-    if (error.code === "P2002") {
+  } catch (error) {
+    const prismaError = error as Prisma.PrismaClientKnownRequestError;
+    if (prismaError?.code === "P2002") {
       return createErrorResponse("User already exists");
     } else {
       return createErrorResponse("Failed to create user");

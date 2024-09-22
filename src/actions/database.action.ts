@@ -7,6 +7,7 @@ import {
   getTenantPrismaClient,
 } from "@/lib/tenant";
 import { delay, formatPostgresErrorText } from "@/lib/utils";
+import { storeSqlCodeInHistory } from "@/actions/history.action";
 
 export async function connectToTenantDatabase(databaseName: string) {
   try {
@@ -33,6 +34,7 @@ export async function disconnectFromTenantDatabase(databaseName: string) {
 export async function executeTenantDatabaseQuery(
   databaseName: string,
   query: string,
+  projectId: string,
 ) {
   const prisma = getTenantPrismaClient(databaseName);
   try {
@@ -40,6 +42,7 @@ export async function executeTenantDatabaseQuery(
       return { error: "No connection found" };
     }
     const result = await prisma.$queryRawUnsafe(query);
+    await storeSqlCodeInHistory(projectId, query, "SUCCESS");
     return { success: true, result: JSON.stringify(result) };
   } catch (error) {
     const updatedError = {
@@ -48,6 +51,7 @@ export async function executeTenantDatabaseQuery(
       // @ts-expect-error "i know what field it returns"
       code: error?.meta?.code,
     };
+    await storeSqlCodeInHistory(projectId, query, "ERROR");
     return { error: formatPostgresErrorText(updatedError) };
   }
 }

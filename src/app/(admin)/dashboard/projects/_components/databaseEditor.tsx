@@ -30,7 +30,8 @@ export default function DatabaseEditor() {
   } = useDatabaseStore();
 
   const mutation = useMutation(
-    (dbName: string) => executeTenantDatabaseQuery(dbName, query),
+    (dbName: string) =>
+      executeTenantDatabaseQuery(dbName, query, project?.id || ""),
     {
       onSuccess: (data) => {
         if (data.success) {
