@@ -13,7 +13,7 @@ export default function DatabaseTerminal() {
   }, [setError, setResult]);
 
   return (
-    <div className={" h-44"}>
+    <div className={"h-full"}>
       <Textarea
         disabled={!connectionStatus}
         readOnly

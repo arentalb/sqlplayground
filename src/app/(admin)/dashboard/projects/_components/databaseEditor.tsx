@@ -101,7 +101,7 @@ export default function DatabaseEditor() {
   }, [query, setHighlightedCode]);
 
   return (
-    <div className="w-full relative rounded-xl flex-grow">
+    <div className="w-full relative rounded-xl flex-grow h-full">
       {isEditor ? (
         <div className="relative w-full h-full rounded-xl">
           <div className="absolute right-4 top-4">

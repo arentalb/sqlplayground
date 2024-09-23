@@ -9,6 +9,11 @@ import { useQuery } from "react-query";
 import { notFound } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import DatabaseHistory from "@/app/(admin)/dashboard/projects/_components/databaseHistory";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 interface PageProps {
   params: { id: string };
@@ -85,10 +90,20 @@ export default function Page({ params }: PageProps) {
       <DatabaseHeader />
       <div className="pt-4 flex max-h-full gap-4 overflow-hidden h-full">
         <div className="flex flex-col gap-4  flex-grow  overflow-hidden px-px py-px ">
-          <DatabaseEditor />
-          <DatabaseTerminal />
+          <ResizablePanelGroup direction="vertical">
+            <ResizablePanel>
+              <DatabaseEditor />
+            </ResizablePanel>
+            <ResizableHandle
+              withHandle
+              className={"my-1 bg-transparent py-1"}
+            />
+            <ResizablePanel>
+              <DatabaseTerminal />
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </div>
-        <div className="w-1/3 flex-shrink-0 max-h-full h-full  overflow-y-auto">
+        <div className="w-1/3 flex-shrink-0 max-h-full h-full hidden md:flex  overflow-y-auto">
           <DatabaseHistory />
         </div>
       </div>
