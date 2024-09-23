@@ -2,7 +2,7 @@
 import React, { FormEvent } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { signOut } from "@/actions/auth.action";
-import { handleResponse } from "@/lib/response";
+import { handleResponse } from "@/lib/response.server";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth/authProvider";
 

@@ -1,13 +1,31 @@
 "use client";
 import { useMutation } from "react-query";
-import {
-  connectToTenantDatabase,
-  disconnectFromTenantDatabase,
-} from "@/actions/database.action";
 import { Button } from "@/components/ui/button";
 import useDatabaseStore from "@/stores/databaseStore";
 import { Loader } from "lucide-react";
+import { TApiError, TApiSuccess } from "@/lib/response.api";
+import axiosInstance from "@/lib/axiosInstance";
+import { useToast } from "@/hooks/use-toast";
 
+const connectToServerDatabase = async (
+  projectId: string,
+): Promise<TApiSuccess<string>> => {
+  const response = await axiosInstance.post(`/api/database/connection`, {
+    projectId: projectId,
+  });
+  return response.data;
+};
+
+const dissConnectToServerDatabase = async (
+  projectId: string,
+): Promise<TApiSuccess<string>> => {
+  const response = await axiosInstance.delete(`/api/database/connection`, {
+    data: {
+      projectId: projectId,
+    },
+  });
+  return response.data;
+};
 export default function DatabaseHeader() {
   const {
     connectionStatus,
@@ -16,11 +34,12 @@ export default function DatabaseHeader() {
     setConnectionLoading,
     project,
   } = useDatabaseStore();
+  const { toast } = useToast();
 
   const connectMutation = useMutation(
-    () => connectToTenantDatabase(project?.database_name || ""),
+    ["connection"],
+    () => connectToServerDatabase(project?.id || ""),
     {
-      onMutate: () => setConnectionLoading(true),
       onSuccess: (data) => {
         if (data.message) {
           setConnectionStatus(true);
@@ -28,24 +47,37 @@ export default function DatabaseHeader() {
           setConnectionStatus(false);
         }
       },
-      onError: () => {
+      onMutate: () => setConnectionLoading(true),
+      onError: (error) => {
+        const apiError = error as TApiError;
         setConnectionStatus(false);
+
+        toast({
+          variant: "destructive",
+          title: apiError.message,
+        });
       },
       onSettled: () => {
         setConnectionLoading(false);
       },
     },
   );
-
   const disconnectMutation = useMutation(
-    () => disconnectFromTenantDatabase(project?.database_name || ""),
+    ["disconnection"],
+    () => dissConnectToServerDatabase(project?.id || ""),
     {
-      onMutate: () => setConnectionLoading(true),
       onSuccess: () => {
         setConnectionStatus(false);
       },
-      onError: () => {
-        setConnectionStatus(true);
+      onMutate: () => setConnectionLoading(true),
+      onError: (error) => {
+        const apiError = error as TApiError;
+        setConnectionStatus(false);
+
+        toast({
+          variant: "destructive",
+          title: apiError.message,
+        });
       },
       onSettled: () => {
         setConnectionLoading(false);

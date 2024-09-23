@@ -50,7 +50,7 @@ export function handleResponse<T>(
  * @param data - Optional data to include in the response
  * @returns An object representing a successful response
  */
-export function createSuccessResponse<T>(data?: T): SuccessResponse<T> {
+export function CreateSuccessResponse<T>(data?: T): SuccessResponse<T> {
   return {
     success: true,
     data,
@@ -64,7 +64,7 @@ export function createSuccessResponse<T>(data?: T): SuccessResponse<T> {
  * @param statusCode - Optional HTTP status code (default is 400)
  * @returns An object representing an error response
  */
-export function createErrorResponse(
+export function CreateErrorResponse(
   errorMessage: string,
   statusCode: number = 400,
 ): ErrorResponse {

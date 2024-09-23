@@ -6,18 +6,37 @@ import {
   oneLight,
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Textarea } from "@/components/ui/textarea";
-import { Code, Highlighter, Play } from "lucide-react";
+import { Code, Highlighter, Loader, Play } from "lucide-react";
 import { useTheme } from "next-themes";
 import { convertToUpperCase } from "@/lib/utils";
 import { useMutation } from "react-query";
-import { executeTenantDatabaseQuery } from "@/actions/database.action";
 import useDatabaseStore from "@/stores/databaseStore";
+import { TApiError, TApiSuccess } from "@/lib/response.api";
+import axiosInstance from "@/lib/axiosInstance";
+import { useToast } from "@/hooks/use-toast";
+import { QueryHistory } from "@prisma/client";
+
+interface TQueryRun {
+  oldQuery: string;
+  history: QueryHistory;
+}
+const runQuery = async (
+  projectId: string,
+  query: string,
+): Promise<TApiSuccess<TQueryRun>> => {
+  const response = await axiosInstance.post(`/api/database/query`, {
+    projectId: projectId,
+    query: query,
+  });
+  return response.data;
+};
 
 export default function DatabaseEditor() {
   const { theme } = useTheme();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isEditor, setIsEditor] = useState<boolean>(true);
   const [highlightedCode, setHighlightedCode] = useState<string>("");
+  const { toast } = useToast();
 
   const {
     query,
@@ -27,27 +46,37 @@ export default function DatabaseEditor() {
     setError,
     setResult,
     project,
+    history,
+    setHistory,
   } = useDatabaseStore();
 
-  const mutation = useMutation(
-    (dbName: string) =>
-      executeTenantDatabaseQuery(dbName, query, project?.id || ""),
+  const { mutate, isLoading } = useMutation(
+    ["query"],
+    () => runQuery(project?.id || "", query),
     {
       onSuccess: (data) => {
-        if (data.success) {
-          setResult(data.result);
-          setError(null);
+        console.log(data);
+        if (data.message === "sqlrun") {
+          setResult(data?.data?.oldQuery || "");
+          setError("");
+          const newHistory = data?.data?.history;
+          if (newHistory) setHistory([newHistory, ...history]);
         } else {
-          setError(data.error);
-          setResult(null);
+          setError(data?.data?.oldQuery || "");
+          setResult("");
+          const newHistory = data?.data?.history;
+          if (newHistory) setHistory([newHistory, ...history]);
         }
       },
-      onError: () => {
-        setError("Failed to connect");
+      onError: (error) => {
+        const apiError = error as TApiError;
+        toast({
+          variant: "destructive",
+          title: apiError.message,
+        });
       },
     },
   );
-
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const input = e.target.value;
     const cursorPosition = e.target.selectionStart;
@@ -64,7 +93,7 @@ export default function DatabaseEditor() {
 
   const handleQueryRun = () => {
     if (project?.database_name && query) {
-      mutation.mutate(project.database_name);
+      mutate();
     }
   };
   useEffect(() => {
@@ -72,14 +101,18 @@ export default function DatabaseEditor() {
   }, [query, setHighlightedCode]);
 
   return (
-    <div className="w-full relative rounded-xl h-60">
+    <div className="w-full relative rounded-xl flex-grow">
       {isEditor ? (
         <div className="relative w-full h-full rounded-xl">
           <div className="absolute right-4 top-4">
             {isEditor && query.length !== 0 && (
               <div className="flex gap-2">
                 <Highlighter onClick={() => setIsEditor(false)} />
-                <Play onClick={handleQueryRun} />
+                {isLoading ? (
+                  <Loader className={"animate-spin"} />
+                ) : (
+                  <Play onClick={handleQueryRun} />
+                )}
               </div>
             )}
           </div>
@@ -96,7 +129,12 @@ export default function DatabaseEditor() {
         <div className="relative w-full h-full rounded-xl">
           <div className="absolute right-4 top-4 flex gap-2 z-10">
             {!isEditor && <Code onClick={() => setIsEditor(true)} />}
-            <Play onClick={handleQueryRun} />
+
+            {isLoading ? (
+              <Loader className={"animate-spin"} />
+            ) : (
+              <Play onClick={handleQueryRun} />
+            )}
           </div>
           <div className="w-full h-full border rounded-md overflow-hidden py-2">
             <SyntaxHighlighter

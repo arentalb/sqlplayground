@@ -7,10 +7,10 @@ export async function storeSqlCodeInHistory(
   sqlCode: string,
   type: "ERROR" | "SUCCESS",
 ) {
-  const { user } = await getAuth();
-  if (!user || !user.id) {
-    return null;
-  }
+  // const { user } = await getAuth();
+  // if (!user || !user.id) {
+  //   return null;
+  // }
 
   try {
     const foundedProject = await db.project.findUnique({
@@ -23,17 +23,17 @@ export async function storeSqlCodeInHistory(
       return null;
     }
 
-    if (foundedProject.owner_id === user.id) {
-      return await db.queryHistory.create({
-        data: {
-          code: sqlCode,
-          project_id: projectId,
-          type: type,
-        },
-      });
-    } else {
-      return null;
-    }
+    // if (foundedProject.owner_id === user.id) {
+    return await db.queryHistory.create({
+      data: {
+        code: sqlCode,
+        project_id: projectId,
+        type: type,
+      },
+    });
+    // } else {
+    //   return null;
+    // }
   } catch (error) {
     console.error("Error storing SQL code in history:", error);
     return null;

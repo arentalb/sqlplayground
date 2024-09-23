@@ -1,7 +1,10 @@
 "use server";
 
 import { CreateProjectData, CreateProjectSchema } from "@/lib/schemas";
-import { createErrorResponse, createSuccessResponse } from "@/lib/response";
+import {
+  CreateErrorResponse,
+  CreateSuccessResponse,
+} from "@/lib/response.server";
 import db from "@/lib/db";
 import { getAuth } from "@/lib/auth/getAuth";
 import { delay } from "@/lib/utils";
@@ -11,13 +14,13 @@ export async function createProject(project: CreateProjectData) {
   const validatedFields = CreateProjectSchema.safeParse(project);
 
   if (!validatedFields.success) {
-    return createErrorResponse("Validation error");
+    return CreateErrorResponse("Validation error");
   }
 
   try {
     const { user } = await getAuth();
     if (!user || !user.id) {
-      return createErrorResponse("User does not exist");
+      return CreateErrorResponse("User does not exist");
     }
 
     const title = validatedFields.data.title;
@@ -37,15 +40,15 @@ export async function createProject(project: CreateProjectData) {
     });
 
     console.log("Project created:", newProject);
-    return createSuccessResponse("Project created successfully");
+    return CreateSuccessResponse("Project created successfully");
   } catch (error) {
     const prismaError = error as Prisma.PrismaClientKnownRequestError;
 
     if (prismaError?.code === "P2010") {
-      return createErrorResponse("Database with that name already exists");
+      return CreateErrorResponse("Database with that name already exists");
     }
     console.error("Error creating project:", error);
-    return createErrorResponse("Failed to create project");
+    return CreateErrorResponse("Failed to create project");
   }
 }
 

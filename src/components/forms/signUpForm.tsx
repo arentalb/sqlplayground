@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { SignUpFormData, SignUpFormSchema } from "@/lib/schemas";
 import { signUp } from "@/actions/auth.action";
 import { useToast } from "@/hooks/use-toast";
-import { handleResponse } from "@/lib/response";
+import { handleResponse } from "@/lib/response.server";
 import { useAuth } from "@/lib/auth/authProvider";
 
 export default function SignUpForm() {

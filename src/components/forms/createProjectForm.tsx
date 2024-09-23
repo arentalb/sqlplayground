@@ -15,7 +15,7 @@ import { CreateProjectData, CreateProjectSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/lib/auth/authProvider";
 import { createProject } from "@/actions/project.action";
-import { handleResponse } from "@/lib/response";
+import { handleResponse } from "@/lib/response.server";
 
 export default function CreateProjectForm() {
   const { toast } = useToast();

@@ -14,7 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { SignInFormData, SignInFormSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
 import { signIn } from "@/actions/auth.action";
-import { handleResponse } from "@/lib/response";
+import { handleResponse } from "@/lib/response.server";
 import { useAuth } from "@/lib/auth/authProvider";
 
 export default function SignInForm() {

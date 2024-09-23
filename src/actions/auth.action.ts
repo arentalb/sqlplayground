@@ -11,7 +11,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { lucia } from "@/lib/auth/lucia";
 import { getAuth } from "@/lib/auth/getAuth";
-import { createErrorResponse } from "@/lib/response";
+import { CreateErrorResponse } from "@/lib/response.server";
 import { Prisma } from ".prisma/client";
 
 enum Role {
@@ -23,7 +23,7 @@ export async function signUp(user: SignUpFormData) {
   const validatedFields = SignUpFormSchema.safeParse(user);
 
   if (!validatedFields.success) {
-    return createErrorResponse("Validation error");
+    return CreateErrorResponse("Validation error");
   }
 
   const validatedUser = validatedFields.data;
@@ -49,9 +49,9 @@ export async function signUp(user: SignUpFormData) {
   } catch (error) {
     const prismaError = error as Prisma.PrismaClientKnownRequestError;
     if (prismaError?.code === "P2002") {
-      return createErrorResponse("User already exists");
+      return CreateErrorResponse("User already exists");
     } else {
-      return createErrorResponse("Failed to create user");
+      return CreateErrorResponse("Failed to create user");
     }
   }
   redirect("/dashboard");
@@ -63,14 +63,14 @@ export async function signIn(user: SignInFormData) {
   });
 
   if (!checkedUser) {
-    return createErrorResponse("User dose not exists");
+    return CreateErrorResponse("User dose not exists");
   }
   const validPassword = await bcrypt.compare(
     user.password,
     checkedUser.password,
   );
   if (!validPassword) {
-    return createErrorResponse("Wrong password");
+    return CreateErrorResponse("Wrong password");
   }
 
   try {
@@ -83,7 +83,7 @@ export async function signIn(user: SignInFormData) {
       sessionCookie.attributes,
     );
   } catch (error) {
-    return createErrorResponse("Failed to login user");
+    return CreateErrorResponse("Failed to login user");
   }
   redirect("/dashboard");
 }
@@ -107,7 +107,7 @@ export const signOut = async () => {
       sessionCookie.attributes,
     );
   } catch (error) {
-    return createErrorResponse("Failed to logout user");
+    return CreateErrorResponse("Failed to logout user");
   }
 
   redirect("/signin");
