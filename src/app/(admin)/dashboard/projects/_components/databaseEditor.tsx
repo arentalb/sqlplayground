@@ -9,27 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Code, Highlighter, Loader, Play } from "lucide-react";
 import { useTheme } from "next-themes";
 import { convertToUpperCase } from "@/lib/utils";
-import { useMutation } from "react-query";
 import useDatabaseStore from "@/stores/databaseStore";
-import { TApiError, TApiSuccess } from "@/lib/response.api";
-import axiosInstance from "@/lib/axiosInstance";
 import { useToast } from "@/hooks/use-toast";
-import { QueryHistory } from "@prisma/client";
-
-interface TQueryRun {
-  oldQuery: string;
-  history: QueryHistory;
-}
-const runQuery = async (
-  projectId: string,
-  query: string,
-): Promise<TApiSuccess<TQueryRun>> => {
-  const response = await axiosInstance.post(`/api/database/query`, {
-    projectId: projectId,
-    query: query,
-  });
-  return response.data;
-};
+import { runQuery } from "@/actions/database/query.action";
 
 export default function DatabaseEditor() {
   const { theme } = useTheme();
@@ -43,40 +25,13 @@ export default function DatabaseEditor() {
     connectionStatus,
     connectionLoading,
     setQuery,
-    setError,
-    setResult,
+    setTerminalError,
+    setTerminalResult,
     project,
     history,
     setHistory,
   } = useDatabaseStore();
 
-  const { mutate, isLoading } = useMutation(
-    ["query"],
-    () => runQuery(project?.id || "", query),
-    {
-      onSuccess: (data) => {
-        console.log(data);
-        if (data.message === "sqlrun") {
-          setResult(data?.data?.oldQuery || "");
-          setError("");
-          const newHistory = data?.data?.history;
-          if (newHistory) setHistory([newHistory, ...history]);
-        } else {
-          setError(data?.data?.oldQuery || "");
-          setResult("");
-          const newHistory = data?.data?.history;
-          if (newHistory) setHistory([newHistory, ...history]);
-        }
-      },
-      onError: (error) => {
-        const apiError = error as TApiError;
-        toast({
-          variant: "destructive",
-          title: apiError.message,
-        });
-      },
-    },
-  );
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const input = e.target.value;
     const cursorPosition = e.target.selectionStart;
@@ -91,11 +46,32 @@ export default function DatabaseEditor() {
     }, 0);
   };
 
-  const handleQueryRun = () => {
-    if (project?.database_name && query) {
-      mutate();
+  const [isLoading, setIsLoading] = useState(false);
+  const handleQueryRun = async () => {
+    setIsLoading(true);
+    const response = await runQuery(project?.id || "", query);
+    if (response.success) {
+      if (response.data.isQuerySuccessful) {
+        setTerminalResult(response.data.oldQuery || "");
+        setTerminalError("");
+        const newHistory = response.data.history;
+        if (newHistory.success) setHistory([newHistory.data, ...history]);
+      } else {
+        console.log(response);
+        setTerminalError(response.data.oldQuery || "");
+        setTerminalResult("");
+        const newHistory = response.data.history;
+        if (newHistory.success) setHistory([newHistory.data, ...history]);
+      }
+    } else if ("error" in response) {
+      toast({
+        variant: "destructive",
+        title: response.error,
+      });
     }
+    setIsLoading(false);
   };
+
   useEffect(() => {
     setHighlightedCode(query);
   }, [query, setHighlightedCode]);

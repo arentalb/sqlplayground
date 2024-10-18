@@ -19,6 +19,14 @@ export const formatPostgresErrorText = ({
   return [`Code: ${safeCode}`, `Message: ${safeMessage}`].join("\n");
 };
 
+export function handleBigInt(result: any) {
+  return JSON.parse(
+    JSON.stringify(result, (key, value) =>
+      typeof value === "bigint" ? value.toString() : value,
+    ),
+  );
+}
+
 const sqlKeywords = [
   "select",
   "from",

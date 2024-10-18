@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { SignUpFormData, SignUpFormSchema } from "@/lib/schemas";
 import { signUp } from "@/actions/auth.action";
 import { useToast } from "@/hooks/use-toast";
-import { handleResponse } from "@/lib/response.server";
 import { useAuth } from "@/lib/auth/authProvider";
 
 export default function SignUpForm() {
@@ -32,21 +31,18 @@ export default function SignUpForm() {
   async function onSubmit(values: SignUpFormData) {
     const response = await signUp(values);
 
-    handleResponse(response, {
-      onSuccess: (data) => {
-        toast({
-          title: `Sign-up successful! ${data ?? ""}`,
-          variant: "default",
-        });
-        refreshUser();
-      },
-      onError: (message) => {
-        toast({
-          title: message,
-          variant: "destructive",
-        });
-      },
-    });
+    if (response && "error" in response) {
+      toast({
+        title: response.error,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: `Sign-up successful!`,
+        variant: "default",
+      });
+      refreshUser();
+    }
   }
   return (
     <Form {...form}>

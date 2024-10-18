@@ -4,20 +4,25 @@ import { Textarea } from "@/components/ui/textarea";
 import useDatabaseStore from "@/stores/databaseStore";
 
 export default function DatabaseTerminal() {
-  const { result, error, setError, setResult, connectionStatus } =
-    useDatabaseStore();
+  const {
+    terminalResult,
+    terminalError,
+    setTerminalError,
+    setTerminalResult,
+    connectionStatus,
+  } = useDatabaseStore();
 
   useEffect(() => {
-    setResult(null);
-    setError(null);
-  }, [setError, setResult]);
+    setTerminalResult(null);
+    setTerminalError(null);
+  }, [setTerminalError, setTerminalResult]);
 
   return (
     <div className={"h-full"}>
       <Textarea
         disabled={!connectionStatus}
         readOnly
-        value={result || error || ""}
+        value={terminalResult || terminalError || ""}
         className="w-full h-full resize-none pt-3 text-[16px] no-scrollbar"
         placeholder="Run Query to see the result"
       />

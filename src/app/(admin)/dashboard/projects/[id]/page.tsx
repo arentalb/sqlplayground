@@ -1,19 +1,19 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { getProjectById } from "@/actions/project.action";
+import { getProjectById } from "@/actions/database/project.action";
 import DatabaseHeader from "@/app/(admin)/dashboard/projects/_components/databaseHeader";
 import DatabaseEditor from "@/app/(admin)/dashboard/projects/_components/databaseEditor";
 import DatabaseTerminal from "@/app/(admin)/dashboard/projects/_components/databaseTerminal";
-import useDatabaseStore from "@/stores/databaseStore";
-import { useQuery } from "react-query";
-import { notFound } from "next/navigation";
-import { Skeleton } from "@/components/ui/skeleton";
 import DatabaseHistory from "@/app/(admin)/dashboard/projects/_components/databaseHistory";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { getDatabaseHistory } from "@/actions/database/history.action";
+import { Skeleton } from "@/components/ui/skeleton";
+import useDatabaseStore from "@/stores/databaseStore";
+import { getDatabaseConnection } from "@/actions/database/connection.action";
 
 interface PageProps {
   params: { id: string };
@@ -22,69 +22,52 @@ interface PageProps {
 export default function Page({ params }: PageProps) {
   const {
     setProject,
-    project,
-    setResult,
-    setQuery,
-    setError,
+    setHistory,
     setConnectionStatus,
+    setQuery,
+    setTerminalResult,
+    setTerminalError,
   } = useDatabaseStore();
-
-  const [isFetching, setIsFetching] = useState(true);
-
-  const { refetch } = useQuery(
-    ["project", params.id],
-    () => getProjectById(params.id),
-    {
-      enabled: false,
-      onSuccess: (res) => {
-        setIsFetching(false);
-        setProject(res);
-      },
-      onError: () => {
-        setIsFetching(false);
-      },
-    },
-  );
-
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
-    if (params.id) {
-      setIsFetching(true);
-      setProject(null);
-      refetch();
-    }
+    const fetchProject = async () => {
+      const currentProject = await getProjectById(params.id);
+      const history = await getDatabaseHistory(params.id);
+      const connectionStatus = await getDatabaseConnection(params.id);
+
+      if (connectionStatus.success) {
+        setConnectionStatus(true);
+      } else {
+        setConnectionStatus(false);
+      }
+      setProject(currentProject?.data || null);
+      setHistory(history.data || []);
+      setIsLoading(false);
+    };
+
+    fetchProject();
+
     return () => {
+      setHistory([]);
       setProject(null);
-      setQuery("");
-      setError("");
-      setResult("");
       setConnectionStatus(false);
+      setQuery("");
+      setTerminalResult(null);
+      setTerminalError(null);
     };
   }, [
     params.id,
-    refetch,
     setConnectionStatus,
-    setError,
+    setHistory,
     setProject,
     setQuery,
-    setResult,
+    setTerminalError,
+    setTerminalResult,
   ]);
 
-  if (isFetching) {
-    return (
-      <div className="px-10 py-6 h-full flex flex-col ">
-        <div className="h-full w-full flex flex-col items-center gap-4">
-          <Skeleton className="min-h-[60px] w-full" />
-          <Skeleton className="min-h-[150px] w-full" />
-          <Skeleton className="h-full w-full" />
-        </div>
-      </div>
-    );
+  if (isLoading) {
+    return <ProjectSkeleton />;
   }
-
-  if (!project) {
-    return notFound();
-  }
-
   return (
     <div className="px-10 py-6 max-h-full h-full flex flex-col overflow-hidden">
       <DatabaseHeader />
@@ -105,6 +88,23 @@ export default function Page({ params }: PageProps) {
         </div>
         <div className="w-1/3 flex-shrink-0 max-h-full h-full hidden md:flex  overflow-y-auto">
           <DatabaseHistory />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProjectSkeleton() {
+  return (
+    <div className="px-10 py-6 h-full flex flex-col ">
+      <div className="h-full w-full flex flex-col items-center gap-4">
+        <Skeleton className="min-h-[60px] w-full" />
+        <div className={"h-full w-full flex gap-4"}>
+          <div className={"h-full w-full flex gap-4 flex-col"}>
+            <Skeleton className="min-h-[150px] w-full" />
+            <Skeleton className="h-full w-full" />
+          </div>
+          <Skeleton className="h-full w-3/5" />
         </div>
       </div>
     </div>

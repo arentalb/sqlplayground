@@ -13,13 +13,10 @@ import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CreateProjectData, CreateProjectSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
-import { useAuth } from "@/lib/auth/authProvider";
-import { createProject } from "@/actions/project.action";
-import { handleResponse } from "@/lib/response.server";
+import { createProject } from "@/actions/database/project.action";
 
 export default function CreateProjectForm() {
   const { toast } = useToast();
-  const { refreshUser } = useAuth();
 
   const form = useForm<CreateProjectData>({
     resolver: zodResolver(CreateProjectSchema),
@@ -33,21 +30,17 @@ export default function CreateProjectForm() {
   async function onSubmit(values: CreateProjectData) {
     const response = await createProject(values);
 
-    handleResponse(response, {
-      onSuccess: (data) => {
-        toast({
-          title: data,
-          variant: "default",
-        });
-        refreshUser();
-      },
-      onError: (message) => {
-        toast({
-          title: message,
-          variant: "destructive",
-        });
-      },
-    });
+    if (response.success) {
+      toast({
+        title: "Project created ",
+        variant: "default",
+      });
+    } else {
+      toast({
+        title: response.error,
+        variant: "destructive",
+      });
+    }
   }
 
   return (

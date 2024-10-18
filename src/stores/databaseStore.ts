@@ -3,15 +3,15 @@ import { Project, QueryHistory } from "@prisma/client";
 
 interface DatabaseState {
   query: string;
-  result: string | null;
-  error: string | null;
+  terminalResult: string | null;
+  terminalError: string | null;
   history: QueryHistory[];
   connectionStatus: boolean;
   connectionLoading: boolean;
   project: Project | null;
   setQuery: (query: string) => void;
-  setResult: (result: string | null) => void;
-  setError: (error: string | null | undefined) => void;
+  setTerminalResult: (result: string | null) => void;
+  setTerminalError: (error: string | null | undefined) => void;
   setConnectionStatus: (status: boolean) => void;
   setConnectionLoading: (loading: boolean) => void;
   setProject: (project: Project | null) => void;
@@ -20,15 +20,15 @@ interface DatabaseState {
 
 const useDatabaseStore = create<DatabaseState>((set) => ({
   query: "",
-  result: null,
-  error: null,
+  terminalResult: null,
+  terminalError: null,
   connectionStatus: false,
   connectionLoading: false,
   project: null,
   history: [],
   setQuery: (query) => set({ query }),
-  setResult: (result) => set({ result }),
-  setError: (error) => set({ error }),
+  setTerminalResult: (result) => set({ terminalResult: result }),
+  setTerminalError: (error) => set({ terminalError: error }),
   setConnectionStatus: (status) => set({ connectionStatus: status }),
   setConnectionLoading: (loading) => set({ connectionLoading: loading }),
   setProject: (project) => set({ project }),

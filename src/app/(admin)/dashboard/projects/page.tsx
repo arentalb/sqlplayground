@@ -1,5 +1,5 @@
 import CreateProjectDialog from "@/app/(admin)/dashboard/projects/_components/createProjectDialog";
-import { getAllMyProjects } from "@/actions/project.action";
+import { getAllMyProjects } from "@/actions/database/project.action";
 import { Project } from "@prisma/client";
 import Link from "next/link";
 
@@ -17,7 +17,7 @@ export default async function Page() {
         }
       >
         {projects &&
-          projects.map((project: Project) => (
+          projects.data?.map((project: Project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
       </div>
