@@ -14,6 +14,8 @@ import { getDatabaseHistory } from "@/actions/database/history.action";
 import { Skeleton } from "@/components/ui/skeleton";
 import useDatabaseStore from "@/stores/databaseStore";
 import { getDatabaseConnection } from "@/actions/database/connection.action";
+import { canConvertToTable } from "@/lib/utils";
+import DatabaseTable from "@/app/(admin)/dashboard/projects/_components/databaseTable";
 
 interface PageProps {
   params: { id: string };
@@ -27,6 +29,7 @@ export default function Page({ params }: PageProps) {
     setQuery,
     setTerminalResult,
     setTerminalError,
+    terminalResult,
   } = useDatabaseStore();
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
@@ -82,7 +85,11 @@ export default function Page({ params }: PageProps) {
               className={"my-1 bg-transparent py-1"}
             />
             <ResizablePanel>
-              <DatabaseTerminal />
+              {canConvertToTable(terminalResult || "") ? (
+                <DatabaseTable />
+              ) : (
+                <DatabaseTerminal />
+              )}
             </ResizablePanel>
           </ResizablePanelGroup>
         </div>
