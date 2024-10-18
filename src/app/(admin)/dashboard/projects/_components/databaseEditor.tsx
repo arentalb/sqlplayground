@@ -77,7 +77,7 @@ export default function DatabaseEditor() {
   }, [query, setHighlightedCode]);
 
   return (
-    <div className="w-full relative rounded-xl flex-grow h-full">
+    <div className="w-full relative rounded-xl flex-grow h-full  ">
       {isEditor ? (
         <div className="relative w-full h-full rounded-xl">
           <div className="absolute right-4 top-4">
@@ -97,7 +97,7 @@ export default function DatabaseEditor() {
             ref={textareaRef}
             value={query}
             onChange={handleInput}
-            className="w-full h-full resize-none pt-3 text-[16px] no-scrollbar"
+            className="w-full h-full resize-none pt-3 text-[16px] no-scrollbar  focus-visible:ring-0  focus:border-violet-600"
             placeholder="Write your SQL query here..."
           />
         </div>
@@ -112,7 +112,7 @@ export default function DatabaseEditor() {
               <Play onClick={handleQueryRun} />
             )}
           </div>
-          <div className="w-full h-full border rounded-md overflow-hidden py-2">
+          <div className="w-full h-full border hover:border-violet-600 rounded-md overflow-hidden py-2">
             <SyntaxHighlighter
               language="sql"
               style={theme === "dark" ? oneDark : oneLight}

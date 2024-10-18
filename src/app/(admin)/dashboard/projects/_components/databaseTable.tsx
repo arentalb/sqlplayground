@@ -2,6 +2,14 @@
 import React from "react";
 import useDatabaseStore from "@/stores/databaseStore";
 import { extractTableData } from "@/lib/utils";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function DatabaseTable() {
   const { terminalResult } = useDatabaseStore();
@@ -11,52 +19,49 @@ export default function DatabaseTable() {
   const { columns, rows } = converted;
 
   return (
-    <>
+    <div className={"h-full w-full relative"}>
       {columns.length > 0 ? (
-        <div className="mt-4 ">
-          <div>
-            <p>Number of found rows: {rows.length}</p>
-          </div>
-          {/* Scrollable container for table body */}
-          <div className="overflow-x-auto w-full no-scrollbar">
-            <div className="relative max-h-96 overflow-y-auto no-scrollbar">
-              {/* Apply table-fixed to make columns shrink */}
-              <table className="min-w-full table-fixed border-collapse border border-gray-300">
-                <thead className="bg-gray-800 text-white">
-                  <tr>
-                    {columns.map((column, index) => (
-                      <th
-                        key={index}
-                        className="border border-gray-300 px-4 py-2 text-left truncate"
-                      >
-                        {column}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((row, rowIndex) => (
-                    <tr key={rowIndex}>
-                      {row.map((cell, cellIndex) => (
-                        <td
-                          key={cellIndex}
-                          className="border border-gray-300 px-4 py-2 truncate"
-                        >
-                          {cell}
-                        </td>
-                      ))}
-                    </tr>
+        <div className="  h-full w-full overflow-x-auto no-scrollbar border rounded-sm">
+          <Table className="min-w-full table-auto border-collapse ">
+            <TableHeader
+              className={" sticky top-0 dark:bg-gray-800 bg-gray-100"}
+            >
+              <TableRow className={" "}>
+                <TableHead className="w-16">#</TableHead>{" "}
+                {columns.map((column, index) => (
+                  <TableHead
+                    key={index}
+                    className="px-4 min-w-[150px] max-w-[300px] whitespace-nowrap"
+                  >
+                    {column}
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody className="">
+              {rows.map((row, rowIndex) => (
+                <TableRow key={rowIndex}>
+                  <TableCell className="font-medium w-16">
+                    {rowIndex + 1}
+                  </TableCell>
+                  {row.map((cell, cellIndex) => (
+                    <TableCell
+                      className="font-medium whitespace-nowrap px-4 min-w-[150px] max-w-[300px] overflow-hidden text-ellipsis"
+                      key={cellIndex}
+                    >
+                      {cell}
+                    </TableCell>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       ) : (
-        <p className="mt-4 text-gray-500">
+        <p className=" text-gray-500">
           No data to display. Run a query to see the result.
         </p>
       )}
-    </>
+    </div>
   );
 }

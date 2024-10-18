@@ -1,21 +1,16 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { getProjectById } from "@/actions/database/project.action";
-import DatabaseHeader from "@/app/(admin)/dashboard/projects/_components/databaseHeader";
-import DatabaseEditor from "@/app/(admin)/dashboard/projects/_components/databaseEditor";
-import DatabaseTerminal from "@/app/(admin)/dashboard/projects/_components/databaseTerminal";
-import DatabaseHistory from "@/app/(admin)/dashboard/projects/_components/databaseHistory";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
 import { getDatabaseHistory } from "@/actions/database/history.action";
 import { Skeleton } from "@/components/ui/skeleton";
 import useDatabaseStore from "@/stores/databaseStore";
 import { getDatabaseConnection } from "@/actions/database/connection.action";
+import DatabaseEditor from "@/app/(admin)/dashboard/projects/_components/databaseEditor";
+import DatabaseHeader from "@/app/(admin)/dashboard/projects/_components/databaseHeader";
 import { canConvertToTable } from "@/lib/utils";
 import DatabaseTable from "@/app/(admin)/dashboard/projects/_components/databaseTable";
+import DatabaseTerminal from "@/app/(admin)/dashboard/projects/_components/databaseTerminal";
+import DatabaseHistory from "@/app/(admin)/dashboard/projects/_components/databaseHistory";
 
 interface PageProps {
   params: { id: string };
@@ -72,29 +67,25 @@ export default function Page({ params }: PageProps) {
     return <ProjectSkeleton />;
   }
   return (
-    <div className="px-10 py-6 max-h-full h-full flex flex-col overflow-hidden">
+    <div className="px-10 py-6 flex-1 flex flex-col  overflow-auto">
       <DatabaseHeader />
-      <div className="pt-4 flex max-h-full gap-4 overflow-hidden h-full">
-        <div className="flex flex-col gap-4  flex-grow  overflow-hidden px-px py-px ">
-          <ResizablePanelGroup direction="vertical">
-            <ResizablePanel>
+      <div className="pt-2  flex flex-1 gap-4 overflow-auto   ">
+        <div className="flex  gap-4 w-full max-h-full rounded-lg flex-1">
+          <div className="grid grid-cols-1 grid-rows-2 gap-4 flex-grow flex-1">
+            <div className="flex items-center justify-center    h-full">
               <DatabaseEditor />
-            </ResizablePanel>
-            <ResizableHandle
-              withHandle
-              className={"my-1 bg-transparent py-1"}
-            />
-            <ResizablePanel>
+            </div>
+            <div className="flex  items-center justify-center   h-full">
               {canConvertToTable(terminalResult || "") ? (
                 <DatabaseTable />
               ) : (
                 <DatabaseTerminal />
               )}
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </div>
-        <div className="w-1/3 flex-shrink-0 max-h-full h-full hidden md:flex  overflow-y-auto">
-          <DatabaseHistory />
+            </div>
+          </div>
+          <div className=" hidden w-1/3 flex-shrink-0 md:flex items-center justify-center   h-full">
+            <DatabaseHistory />
+          </div>
         </div>
       </div>
     </div>
