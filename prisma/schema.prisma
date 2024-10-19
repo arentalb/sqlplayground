@@ -38,14 +38,17 @@ model Project {
   description            String
   database_name          String
   database_url           String
-  owner_id               String
-  cloned_from_project_id String?
-  clone_count            Int            @default(0)
+  privacy_status         String         @default("PRIVATE")
   created_at             DateTime       @default(now())
   updated_at             DateTime       @updatedAt
   queries                Query[]
-  owner                  User           @relation(fields: [owner_id], references: [id])
   queryHistories         QueryHistory[]
+  owner_id               String
+  owner                  User           @relation(fields: [owner_id], references: [id])
+  is_cloned              Boolean        @default(false)
+  cloned_from_project_id String?
+  cloned_from_project    Project?       @relation("Clones", fields: [cloned_from_project_id], references: [id])
+  clones                 Project[]      @relation("Clones")
 }
 
 model Query {
