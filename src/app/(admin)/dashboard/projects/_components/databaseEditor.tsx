@@ -6,12 +6,12 @@ import {
   oneLight,
 } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Textarea } from "@/components/ui/textarea";
-import { Code, Highlighter, Loader, Play } from "lucide-react";
 import { useTheme } from "next-themes";
-import { convertToUpperCase } from "@/lib/utils";
+import { cn, convertToUpperCase } from "@/lib/utils";
 import useDatabaseStore from "@/stores/databaseStore";
 import { useToast } from "@/hooks/use-toast";
 import { runQuery } from "@/actions/database/query.action";
+import { Code, Highlighter, Loader, Play } from "lucide-react";
 
 export default function DatabaseEditor() {
   const { theme } = useTheme();
@@ -77,70 +77,88 @@ export default function DatabaseEditor() {
   }, [query, setHighlightedCode]);
 
   return (
-    <div className="w-full relative rounded-xl flex-grow h-full  ">
+    <div className="w-full relative flex gap-2 rounded-xl flex-grow h-full  ">
       {isEditor ? (
-        <div className="relative w-full h-full rounded-xl">
-          <div className="absolute right-4 top-4">
-            {isEditor && query.length !== 0 && (
-              <div className="flex gap-2">
-                <Highlighter onClick={() => setIsEditor(false)} />
-                {isLoading ? (
-                  <Loader className={"animate-spin"} />
-                ) : (
-                  <Play onClick={handleQueryRun} />
-                )}
-              </div>
-            )}
-          </div>
+        <div className="relative overflow-auto flex-grow h-full rounded-xl no-scrollbar">
           <Textarea
             disabled={connectionLoading || !connectionStatus}
             ref={textareaRef}
             value={query}
             onChange={handleInput}
-            className="w-full h-full resize-none pt-3 text-[16px] no-scrollbar  focus-visible:ring-0  focus:border-violet-600"
+            className="w-full h-full  whitespace-nowrap resize-none pt-3 text-[16px] no-scrollbar  focus-visible:ring-0  focus:border-violet-600"
             placeholder="Write your SQL query here..."
           />
         </div>
       ) : (
-        <div className="relative w-full h-full rounded-xl">
-          <div className="absolute right-4 top-4 flex gap-2 z-10">
-            {!isEditor && <Code onClick={() => setIsEditor(true)} />}
-
-            {isLoading ? (
-              <Loader className={"animate-spin"} />
-            ) : (
-              <Play onClick={handleQueryRun} />
-            )}
-          </div>
-          <div className="w-full h-full border hover:border-violet-600 rounded-md overflow-hidden py-2">
-            <SyntaxHighlighter
-              language="sql"
-              style={theme === "dark" ? oneDark : oneLight}
-              showLineNumbers={true}
-              customStyle={{
-                paddingTop: 0,
-                whiteSpace: "pre-wrap",
-                backgroundColor: "transparent",
-                height: "100%",
-                width: "100%",
-                overflow: "auto",
-                scrollbarWidth: "none",
-                borderRadius: "10px",
-                boxSizing: "border-box",
-              }}
-              codeTagProps={{
-                style: {
-                  fontSize: "16px",
-                  fontFamily: "monospace",
-                },
-              }}
-              className="custom-syntax-highlighter"
-            >
-              {highlightedCode}
-            </SyntaxHighlighter>
-          </div>
+        <div className="relative overflow-auto no-scrollbar flex flex-grow h-full rounded-xl border hover:border-violet-600  py-2">
+          <SyntaxHighlighter
+            language="sql"
+            style={theme === "dark" ? oneDark : oneLight}
+            showLineNumbers={true}
+            customStyle={{
+              paddingTop: 0,
+              whiteSpace: "wrap",
+              backgroundColor: "transparent",
+              overflow: "auto",
+              scrollbarWidth: "none",
+              borderRadius: "10px",
+              boxSizing: "border-box",
+            }}
+            codeTagProps={{
+              style: {
+                fontSize: "16px",
+                fontFamily: "monospace",
+              },
+            }}
+            className="custom-syntax-highlighter flex "
+          >
+            {highlightedCode}
+          </SyntaxHighlighter>
         </div>
       )}
+      <EditorActions
+        isEditor={isEditor}
+        setIsEditor={setIsEditor}
+        isLoading={isLoading}
+        handleQueryRun={handleQueryRun}
+        query={query}
+        connectionStatus={connectionStatus}
+      />
+    </div>
+  );
+}
+
+function EditorActions({
+  isEditor,
+  setIsEditor,
+  isLoading,
+  handleQueryRun,
+  query,
+  connectionStatus,
+}: {
+  isEditor: boolean;
+  setIsEditor: (con: boolean) => void;
+  isLoading: boolean;
+  handleQueryRun: () => void;
+  query: string;
+  connectionStatus: boolean;
+}) {
+  return (
+    <div
+      className={` border  gap-2 z-10 p-2 flex-shrink    rounded-sm ${cn(connectionStatus && query.length !== 0 ? "block" : " hidden")} `}
+    >
+      <div className={"flex flex-col gap-2"}>
+        {isLoading ? (
+          <Loader className={"animate-spin"} />
+        ) : (
+          <Play onClick={handleQueryRun} />
+        )}
+        {isEditor ? (
+          <Highlighter onClick={() => setIsEditor(false)} />
+        ) : (
+          <Code onClick={() => setIsEditor(true)} />
+        )}
+      </div>
     </div>
   );
 }
