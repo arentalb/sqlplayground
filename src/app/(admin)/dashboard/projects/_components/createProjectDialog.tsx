@@ -16,7 +16,7 @@ export default function CreateProjectDialog() {
       <DialogTrigger asChild>
         <Button>Create New Project</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className=" bg-gray-100 hover:bg-gray-200  dark:bg-gray-900 dark:hover:bg-gray-900 dark:border-gray-700  dark:text-gray-100">
         <DialogHeader>
           <DialogTitle>Create a New Project</DialogTitle>
           <DialogDescription>
