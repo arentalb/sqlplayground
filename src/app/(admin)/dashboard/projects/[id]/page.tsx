@@ -11,6 +11,11 @@ import { canConvertToTable } from "@/lib/utils";
 import DatabaseTable from "@/app/(admin)/dashboard/projects/_components/databaseTable";
 import DatabaseTerminal from "@/app/(admin)/dashboard/projects/_components/databaseTerminal";
 import DatabaseHistory from "@/app/(admin)/dashboard/projects/_components/databaseHistory";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 interface PageProps {
   params: { id: string };
@@ -71,17 +76,24 @@ export default function Page({ params }: PageProps) {
       <DatabaseHeader />
       <div className="pt-2  flex flex-1 gap-4 overflow-auto   ">
         <div className="flex  gap-4 w-full max-h-full rounded-lg flex-1">
-          <div className="grid grid-cols-1 grid-rows-2 gap-4 flex-grow flex-1">
-            <div className="flex items-center justify-center    h-full">
-              <DatabaseEditor />
-            </div>
-            <div className="flex  items-center justify-center   h-full">
-              {canConvertToTable(terminalResult || "") ? (
-                <DatabaseTable />
-              ) : (
-                <DatabaseTerminal />
-              )}
-            </div>
+          <div className="grid grid-cols-1 gap-4 flex-grow flex-1">
+            <ResizablePanelGroup direction="vertical">
+              <ResizablePanel>
+                <div className="flex items-center justify-center    h-full">
+                  <DatabaseEditor />
+                </div>
+              </ResizablePanel>
+              <ResizableHandle withHandle className={"my-3"} />
+              <ResizablePanel>
+                <div className="flex  items-center justify-center   h-full">
+                  {canConvertToTable(terminalResult || "") ? (
+                    <DatabaseTable />
+                  ) : (
+                    <DatabaseTerminal />
+                  )}
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
           </div>
           <div className=" hidden w-1/3 flex-shrink-0 md:flex items-center justify-center   h-full">
             <DatabaseHistory />
