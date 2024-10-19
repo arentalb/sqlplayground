@@ -85,7 +85,7 @@ export default function DatabaseEditor() {
             ref={textareaRef}
             value={query}
             onChange={handleInput}
-            className="w-full h-full  whitespace-nowrap resize-none pt-3 text-[16px] no-scrollbar  focus-visible:ring-0  focus:border-violet-600"
+            className="w-full h-full whitespace-pre resize-none pt-3 text-[16px] no-scrollbar focus-visible:ring-0 focus:border-violet-600 overflow-auto"
             placeholder="Write your SQL query here..."
           />
         </div>
