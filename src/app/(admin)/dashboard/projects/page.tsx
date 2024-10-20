@@ -28,7 +28,7 @@ export default async function Page() {
 function ProjectCard({ project }: { project: Project }) {
   return (
     <Link
-      href={`/dashboard/projects/${project.id}`}
+      href={`/dashboard/projects/detail/${project.id}`}
       className="border border-gray-200 rounded-3xl p-6 hover:border-violet-500 transition-all duration-300 shadow-lg
     bg-gray-100 hover:bg-gray-200 inset-0 dark:bg-gray-900/50 dark:hover:bg-gray-900/70
     dark:border-gray-700  dark:text-gray-100"

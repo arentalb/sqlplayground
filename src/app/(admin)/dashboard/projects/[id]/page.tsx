@@ -16,6 +16,8 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { useAuth } from "@/lib/auth/authProvider";
+import { useRouter } from "next/navigation";
 
 interface PageProps {
   params: { id: string };
@@ -32,9 +34,14 @@ export default function Page({ params }: PageProps) {
     terminalResult,
   } = useDatabaseStore();
   const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const router = useRouter();
   useEffect(() => {
     const fetchProject = async () => {
       const currentProject = await getProjectById(params.id);
+      if (currentProject?.data?.owner_id !== user?.id) {
+        router.replace("/dashboard");
+      }
       const history = await getDatabaseHistory(params.id);
       const connectionStatus = await getDatabaseConnection(params.id);
 
@@ -60,12 +67,14 @@ export default function Page({ params }: PageProps) {
     };
   }, [
     params.id,
+    router,
     setConnectionStatus,
     setHistory,
     setProject,
     setQuery,
     setTerminalError,
     setTerminalResult,
+    user?.id,
   ]);
 
   if (isLoading) {

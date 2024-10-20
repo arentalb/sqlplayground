@@ -64,6 +64,28 @@ export async function getAllMyProjects() {
   }
 }
 
+export async function getAllPublicProjects() {
+  try {
+    const { user } = await getAuth();
+    if (!user) {
+      return { error: "Unauthorized" };
+    }
+
+    const publicProjects = await db.project.findMany({
+      where: {
+        privacy_status: "PUBLIC",
+        owner_id: {
+          not: user.id,
+        },
+      },
+    });
+
+    return { success: "Projects fetched successfully", data: publicProjects };
+  } catch (error) {
+    return { error: "An error occurred while fetching projects" };
+  }
+}
+
 export async function getProjectById(id: string) {
   try {
     const { user } = await getAuth();
@@ -76,7 +98,103 @@ export async function getProjectById(id: string) {
       return { error: "Project not found" };
     }
 
-    if (project.owner_id !== user.id) {
+    if (project.owner_id !== user.id && project.privacy_status !== "PUBLIC") {
+      return { error: "You are not authorized to access this project" };
+    }
+
+    return { success: "Project fetched successfully", data: project };
+  } catch (error) {
+    return { error: "An error occurred while fetching the project" };
+  }
+}
+
+export type ProjectDetail = Prisma.ProjectGetPayload<{
+  include: {
+    owner: {
+      select: {
+        id: true;
+        email: true;
+        username: true;
+      };
+    };
+    clones: {
+      select: {
+        id: true;
+        title: true;
+        created_at: true;
+        owner: {
+          select: {
+            id: true;
+            username: true;
+          };
+        };
+      };
+    };
+    cloned_from_project: {
+      select: {
+        id: true;
+        title: true;
+        owner: {
+          select: {
+            id: true;
+            username: true;
+          };
+        };
+      };
+    };
+  };
+}>;
+
+export async function getProjectDetailById(id: string) {
+  try {
+    const { user } = await getAuth();
+    if (!user) {
+      return { error: "Unauthorized" };
+    }
+
+    const project = await db.project.findUnique({
+      where: { id },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            email: true,
+            username: true,
+          },
+        },
+        clones: {
+          select: {
+            id: true,
+            title: true,
+            created_at: true,
+            owner: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
+        cloned_from_project: {
+          select: {
+            id: true,
+            title: true,
+            owner: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!project) {
+      return { error: "Project not found" };
+    }
+
+    if (project.owner_id !== user.id && project.privacy_status !== "PUBLIC") {
       return { error: "You are not authorized to access this project" };
     }
 
