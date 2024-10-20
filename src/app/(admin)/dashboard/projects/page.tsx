@@ -13,7 +13,7 @@ export default async function Page() {
       </div>
       <div
         className={
-          " pt-2 grid  grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-4"
+          " pt-2 grid overflow-auto grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-4"
         }
       >
         {projects &&

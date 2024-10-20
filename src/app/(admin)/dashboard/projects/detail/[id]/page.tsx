@@ -8,7 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth/authProvider";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { CopyPlus, DatabaseZap, FilePenLine } from "lucide-react";
+import { DatabaseZap, FilePenLine } from "lucide-react";
+import CloneProjectDialog from "@/app/(admin)/dashboard/projects/_components/cloneProjectDialog";
 
 interface PageProps {
   params: { id: string };
@@ -58,10 +59,7 @@ export default function Page({ params }: PageProps) {
               </Button>
             </>
           ) : (
-            <Button className={"flex gap-2 items-center"}>
-              <CopyPlus width={20} height={20} />
-              Clone{" "}
-            </Button>
+            <CloneProjectDialog clonedFromProjectId={params.id} />
           )}
         </div>
       </div>

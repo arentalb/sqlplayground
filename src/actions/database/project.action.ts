@@ -1,8 +1,14 @@
 "use server";
-import { CreateProjectData, CreateProjectSchema } from "@/lib/schemas";
+import {
+  CloneProjectData,
+  CloneProjectSchema,
+  CreateProjectData,
+  CreateProjectSchema,
+} from "@/lib/schemas";
 import db from "@/lib/db";
 import { getAuth } from "@/lib/auth/getAuth";
 import { Prisma } from ".prisma/client";
+import { checkDatabaseName } from "@/lib/utils";
 
 export async function createProject(project: CreateProjectData) {
   const validatedFields = CreateProjectSchema.safeParse(project);
@@ -44,6 +50,114 @@ export async function createProject(project: CreateProjectData) {
     }
 
     return { error: "An error occurred while creating the project" };
+  }
+}
+
+export async function cloneProject(project: CloneProjectData) {
+  const validatedFields = CloneProjectSchema.safeParse(project);
+  if (!validatedFields.success) {
+    return { error: "Validation failed" };
+  }
+
+  let newDatabaseName = "";
+
+  try {
+    const { user } = await getAuth();
+    if (!user) {
+      return { error: "Unauthorized" };
+    }
+
+    const {
+      title,
+      description,
+      database_name: requestedDatabaseName,
+      clonedFromProjectId,
+    } = validatedFields.data;
+
+    if (!checkDatabaseName(requestedDatabaseName)) {
+      return { error: "Invalid database name" };
+    }
+
+    newDatabaseName = requestedDatabaseName;
+
+    const sourceProject = await db.project.findUnique({
+      where: { id: clonedFromProjectId },
+    });
+    if (!sourceProject) {
+      return { error: "Source project not found" };
+    }
+
+    if (sourceProject.privacy_status === "PRIVATE") {
+      return { error: "This project is private" };
+    }
+
+    await db.$executeRawUnsafe(
+      `SELECT pg_terminate_backend(pid)
+       FROM pg_stat_activity
+       WHERE datname = $1 AND pid <> pg_backend_pid();`,
+      sourceProject.database_name,
+    );
+
+    await db.$executeRawUnsafe(
+      `CREATE DATABASE ${newDatabaseName} TEMPLATE ${sourceProject.database_name};`,
+    );
+
+    const newProject = await db.$transaction(async (tx) => {
+      const newProject = await tx.project.create({
+        data: {
+          database_name: newDatabaseName,
+          title,
+          description,
+          database_url: `postgresql://postgres:12345@localhost:5432/${newDatabaseName}`,
+          owner_id: user.id,
+          cloned_from_project_id: clonedFromProjectId,
+          is_cloned: true,
+        },
+      });
+
+      const oldDatabaseHistory = await tx.queryHistory.findMany({
+        where: {
+          project_id: clonedFromProjectId,
+        },
+      });
+
+      const mappedHistory = oldDatabaseHistory.map(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ({ id, created_at, updated_at, ...history }) => {
+          return {
+            ...history,
+            project_id: newProject.id,
+          };
+        },
+      );
+
+      await tx.queryHistory.createMany({
+        data: mappedHistory,
+      });
+
+      return newProject;
+    });
+
+    return { success: "Project cloned successfully", data: newProject };
+  } catch (error) {
+    if (newDatabaseName) {
+      try {
+        await db.$executeRawUnsafe(
+          `DROP DATABASE IF EXISTS ${newDatabaseName};`,
+        );
+      } catch (dropError) {
+        return { error: "Failed to drop database" };
+      }
+    }
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2010"
+    ) {
+      return { error: "A database with that name already exists" };
+    }
+
+    return { error: "An error occurred while cloning the project" };
   }
 }
 

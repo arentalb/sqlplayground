@@ -125,3 +125,8 @@ export const canConvertToTable = (data: string): boolean => {
     );
   });
 };
+
+export function checkDatabaseName(dbName: string) {
+  const dbNameRegex = /^[a-zA-Z0-9_]+$/;
+  return dbNameRegex.test(dbName);
+}

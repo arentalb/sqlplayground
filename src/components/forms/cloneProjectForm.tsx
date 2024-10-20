@@ -11,31 +11,39 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CreateProjectData, CreateProjectSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
-import { createProject } from "@/actions/database/project.action";
+import { cloneProject } from "@/actions/database/project.action";
+import { z } from "zod";
+import { CloneProjectSchema } from "@/lib/schemas";
 import { useRouter } from "next/navigation";
 
-export default function CreateProjectForm() {
+export type CloneProjectData = z.infer<typeof CloneProjectSchema>;
+
+export default function CloneProjectForm({
+  clonedFromProjectId,
+}: {
+  clonedFromProjectId: string;
+}) {
   const { toast } = useToast();
 
-  const form = useForm<CreateProjectData>({
-    resolver: zodResolver(CreateProjectSchema),
+  const form = useForm<CloneProjectData>({
+    resolver: zodResolver(CloneProjectSchema),
     defaultValues: {
       title: "",
       description: "",
       database_name: "",
+      clonedFromProjectId: clonedFromProjectId,
     },
   });
-  const router = useRouter();
 
-  async function onSubmit(values: CreateProjectData) {
-    const response = await createProject(values);
-    router.push(`/dashboard/projects/detail/${response?.data?.id}`);
+  const router = useRouter();
+  async function onSubmit(values: CloneProjectData) {
+    const response = await cloneProject(values);
 
     if (response.success) {
+      router.push(`/dashboard/projects/detail/${response.data.id}`);
       toast({
-        title: "Project created ",
+        title: "Project cloned ",
         variant: "default",
       });
     } else {
@@ -102,8 +110,26 @@ export default function CreateProjectForm() {
           )}
         />
 
+        <FormField
+          control={form.control}
+          name="clonedFromProjectId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Clone from </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="ID"
+                  className={"h-12"}
+                  {...field}
+                  disabled={true}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Button type="submit" className={"w-full h-12"}>
-          Create
+          Clone
         </Button>
       </form>
     </Form>
