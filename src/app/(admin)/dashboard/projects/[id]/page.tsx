@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/resizable";
 import { useAuth } from "@/lib/auth/authProvider";
 import { useRouter } from "next/navigation";
+import FixedHeaderActionsBar from "@/app/(admin)/dashboard/projects/_components/fixedHeaderActionsBar";
 
 interface PageProps {
   params: { id: string };
@@ -81,9 +82,11 @@ export default function Page({ params }: PageProps) {
     return <ProjectSkeleton />;
   }
   return (
-    <div className="px-10 py-6 flex-1 flex flex-col  overflow-auto">
-      <DatabaseHeader />
-      <div className="pt-2  flex flex-1 gap-4 overflow-auto   ">
+    <div className="flex-1 flex flex-col  overflow-auto">
+      <FixedHeaderActionsBar>
+        <DatabaseHeader />
+      </FixedHeaderActionsBar>
+      <div className="px-10 py-4 flex flex-1 gap-4 overflow-auto   ">
         <div className="flex  gap-4 w-full max-h-full rounded-lg flex-1">
           <div className="grid grid-cols-1 gap-4 flex-grow flex-1">
             <ResizablePanelGroup direction="vertical">

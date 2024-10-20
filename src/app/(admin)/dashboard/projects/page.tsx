@@ -2,18 +2,20 @@ import CreateProjectDialog from "@/app/(admin)/dashboard/projects/_components/cr
 import { getAllMyProjects } from "@/actions/database/project.action";
 import { Project } from "@prisma/client";
 import Link from "next/link";
+import React from "react";
+import FixedHeaderActionsBar from "@/app/(admin)/dashboard/projects/_components/fixedHeaderActionsBar";
 
 export default async function Page() {
   const projects = await getAllMyProjects();
 
   return (
-    <div className={"px-10 py-6"}>
-      <div className={" py-2"}>
+    <div className={"  overflow-auto relative"}>
+      <FixedHeaderActionsBar>
         <CreateProjectDialog />
-      </div>
+      </FixedHeaderActionsBar>
       <div
         className={
-          " pt-2 grid overflow-auto grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-4"
+          "grid px-10 overflow-auto py-4  grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-4"
         }
       >
         {projects &&

@@ -1,12 +1,13 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Loader } from "lucide-react";
+import { CirclePower, Loader } from "lucide-react";
 import useDatabaseStore from "@/stores/databaseStore";
 import {
   connectToDatabase,
   disconnectFromDatabase,
 } from "@/actions/database/connection.action";
 import { useToast } from "@/hooks/use-toast";
+import React from "react";
 
 export default function DatabaseHeader() {
   const {
@@ -48,7 +49,7 @@ export default function DatabaseHeader() {
   }
 
   return (
-    <div className="flex gap-4 justify-between border-b pb-4">
+    <div className={"flex justify-between items-center w-full"}>
       <div className="flex gap-4">
         <div>
           <p className="text-xs text-gray-600 capitalize">Title</p>
@@ -60,11 +61,8 @@ export default function DatabaseHeader() {
         </div>
       </div>
       <div className="flex gap-4 items-center">
-        <div
-          className={`p-2 ${connectionStatus ? "bg-green-600" : "bg-red-600"} w-4 h-4 rounded-full`}
-        />
         <Button
-          className="w-40"
+          className="min-w-28"
           onClick={connectionStatus ? handleDisConnect : handleConnect}
           disabled={connectionLoading}
         >
@@ -76,6 +74,9 @@ export default function DatabaseHeader() {
             "Connect"
           )}
         </Button>
+        <CirclePower
+          className={` ${connectionStatus ? "stroke-green-600" : "stroke-red-600"} `}
+        />
       </div>
     </div>
   );
