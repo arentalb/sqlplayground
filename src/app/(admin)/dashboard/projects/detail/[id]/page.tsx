@@ -1,9 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {
-  getProjectDetailById,
-  ProjectDetail,
-} from "@/actions/database/project.action";
+import { getProjectDetailById } from "@/actions/database/project.action";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth/authProvider";
 import { Button } from "@/components/ui/button";
@@ -12,6 +9,8 @@ import { DatabaseZap, FilePenLine } from "lucide-react";
 import CloneProjectDialog from "@/app/(admin)/dashboard/projects/_components/cloneProjectDialog";
 import FixedHeaderActionsBar from "@/app/(admin)/dashboard/projects/_components/fixedHeaderActionsBar";
 import { DatabaseDigram } from "@/app/(admin)/dashboard/projects/_components/databaseDiagram";
+import ProjectDetail from "@/app/(admin)/dashboard/projects/detail/[id]/_components/projectDetail";
+import { ProjectDetailType } from "@/actions/types";
 
 interface PageProps {
   params: { id: string };
@@ -19,7 +18,7 @@ interface PageProps {
 
 export default function Page({ params }: PageProps) {
   const [isLoading, setIsLoading] = useState(true);
-  const [project, setProject] = useState<ProjectDetail | null>();
+  const [project, setProject] = useState<ProjectDetailType | null>();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -36,16 +35,19 @@ export default function Page({ params }: PageProps) {
   }, [params.id, user?.id]);
 
   if (isLoading) {
-    return <ProjectSkeleton />;
+    return <ProjectDetailSkeleton />;
+  }
+  if (!project) {
+    return;
   }
   if (project?.privacy_status !== "PUBLIC" && project?.owner_id !== user?.id) {
     return <div>this project may be deleted or may be private </div>;
   }
   return (
-    <div className=" flex-1 flex flex-col overflow-auto">
+    <div className="flex-1 flex flex-col ">
       <FixedHeaderActionsBar>
-        <div className={"flex justify-between items-center w-full"}>
-          <h2 className="text-xl font-bold ">Project Details</h2>
+        <div className="flex justify-between items-center w-full">
+          <h2 className="text-xl font-bold">Project Details</h2>
 
           <div className="flex gap-4 items-center">
             {user?.id === project?.owner_id ? (
@@ -53,13 +55,13 @@ export default function Page({ params }: PageProps) {
                 <Button asChild>
                   <Link
                     href={`/dashboard/projects/${project?.id}`}
-                    className={"flex gap-2 items-center"}
+                    className="flex gap-2 items-center"
                   >
                     <DatabaseZap width={20} height={20} />
                     Play Ground
                   </Link>
                 </Button>
-                <Button className={"flex gap-2 items-center"}>
+                <Button className="flex gap-2 items-center">
                   <FilePenLine width={20} height={20} />
                   Edit{" "}
                 </Button>
@@ -70,105 +72,22 @@ export default function Page({ params }: PageProps) {
           </div>
         </div>
       </FixedHeaderActionsBar>
-      <div className={"grid grid-cols-2 h-full px-10 py-4 gap-4"}>
-        <DatabaseDigram databaseName={project?.database_name || ""} />
-        <div className={""}>
-          <div className="flex  flex-wrap gap-4 mb-4 ">
-            <div>
-              <p className="text-xs text-gray-600 capitalize">Title</p>
-              <p>{project?.title}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-600 capitalize">Database</p>
-              <p>{project?.database_name}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-600 capitalize">Owner</p>
-              <p>{project?.owner.username}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-600 capitalize">Is Cloned</p>
-              <p>{project?.is_cloned ? "Yes" : "No"}</p>
-            </div>
-            <div>
-              {project?.is_cloned && (
-                <>
-                  <p className="text-xs text-gray-600 capitalize">
-                    Cloned from{" "}
-                  </p>
-
-                  <Link
-                    className={"underline"}
-                    href={`/dashboard/projects/detail/${project?.cloned_from_project?.id}`}
-                  >
-                    {project?.cloned_from_project
-                      ? `${project.cloned_from_project.title} `
-                      : "Not cloned"}
-                  </Link>
-                </>
-              )}
-            </div>
-            <div>
-              <p className="text-xs text-gray-600 capitalize">Visibility</p>
-              <p>{project?.privacy_status}</p>
-            </div>
-
-            <div>
-              <p className="text-xs text-gray-600 capitalize">Created At</p>
-              <p>
-                {project?.created_at
-                  ? new Date(project.created_at).toLocaleString()
-                  : "Unknown"}
-              </p>
-            </div>
-          </div>
-          <div className="  mb-8 ">
-            <div>
-              <p className="text-xs text-gray-600 capitalize">description</p>
-              <p>{project?.description}</p>
-            </div>
-          </div>
-          <div className={""}>
-            <h3 className="text-lg font-bold ">
-              Project cloned from this project :
-            </h3>
-            {project?.clones?.length ? (
-              <ul>
-                {project.clones.map((clone) => (
-                  <li key={clone.id}>
-                    {/*<strong>{clone.title}</strong> (ID: {clone.id}) by{" "}*/}
-                    {/*{clone.owner?.username ?? "Unknown"} - Created At:{" "}*/}
-                    {/*{new Date(clone.created_at).toLocaleString()}*/}
-                    <Link
-                      className={"underline"}
-                      href={`/dashboard/projects/detail/${clone?.id}`}
-                    >
-                      {clone ? `${clone.title} ` : "Not cloned"}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No clones available for this project.</p>
-            )}
-          </div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 h-full px-10 py-4 gap-4">
+        <ProjectDetail project={project} />
+        <DatabaseDigram databaseName={project?.database_name} />
       </div>
     </div>
   );
 }
 
-function ProjectSkeleton() {
+function ProjectDetailSkeleton() {
   return (
     <div className="px-10 py-6 h-full flex flex-col ">
       <div className="h-full w-full flex flex-col items-center gap-4">
         <Skeleton className="min-h-[60px] w-full" />
-        <div className={"h-full w-full flex gap-4"}>
-          <div className={"h-full w-full flex gap-4 flex-col"}>
-            <Skeleton className="min-h-[150px] w-full" />
-            <Skeleton className="h-full w-full" />
-          </div>
-          <Skeleton className="h-full w-3/5" />
+        <div className="grid grid-cols-1 md:grid-cols-2 w-full h-full   gap-4">
+          <Skeleton className="h-full w-full" />
+          <Skeleton className="h-full w-full" />
         </div>
       </div>
     </div>
