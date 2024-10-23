@@ -5,12 +5,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/auth/authProvider";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { DatabaseZap, FilePenLine } from "lucide-react";
+import { DatabaseZap } from "lucide-react";
 import CloneProjectDialog from "@/app/(admin)/dashboard/projects/_components/cloneProjectDialog";
 import FixedHeaderActionsBar from "@/app/(admin)/dashboard/projects/_components/fixedHeaderActionsBar";
 import { DatabaseDigram } from "@/app/(admin)/dashboard/projects/_components/databaseDiagram";
 import ProjectDetail from "@/app/(admin)/dashboard/projects/detail/[id]/_components/projectDetail";
 import { ProjectDetailType } from "@/actions/types";
+import EditProjectDialog from "@/app/(admin)/dashboard/projects/detail/[id]/_components/editProjectDialog";
 
 interface PageProps {
   params: { id: string };
@@ -61,10 +62,7 @@ export default function Page({ params }: PageProps) {
                     Play Ground
                   </Link>
                 </Button>
-                <Button className="flex gap-2 items-center">
-                  <FilePenLine width={20} height={20} />
-                  Edit{" "}
-                </Button>
+                <EditProjectDialog project={project} />
               </>
             ) : (
               <CloneProjectDialog clonedFromProjectId={params.id} />

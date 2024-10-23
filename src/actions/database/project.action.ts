@@ -4,6 +4,8 @@ import {
   CloneProjectSchema,
   CreateProjectData,
   CreateProjectSchema,
+  EditProjectData,
+  EditProjectSchema,
 } from "@/lib/schemas";
 import db from "@/lib/db";
 import { getAuth } from "@/lib/auth/getAuth";
@@ -55,6 +57,88 @@ export async function createProject(project: CreateProjectData) {
     }
 
     return { error: "An error occurred while creating the project" };
+  }
+}
+export async function editProject(project: EditProjectData, projectId: string) {
+  const validatedFields = EditProjectSchema.safeParse(project);
+  if (!validatedFields.success) {
+    return { error: "Validation failed" };
+  }
+  if (!projectId) {
+    return { error: "provide project id " };
+  }
+
+  try {
+    const { user } = await getAuth();
+    if (!user) {
+      return { error: "Unauthorized" };
+    }
+
+    const { title, description, visibility } = validatedFields.data;
+
+    const visibilityText = visibility ? "PUBLIC" : "PRIVATE";
+
+    const updatedProject = await db.project.update({
+      where: {
+        id: projectId,
+      },
+      data: {
+        title,
+        description,
+        privacy_status: visibilityText,
+      },
+    });
+
+    return { success: "Project updated successfully", data: updatedProject };
+  } catch (error) {
+    return { error: "An error occurred while updating the project" };
+  }
+}
+export async function deleteProject(projectId: string) {
+  if (!projectId) {
+    return { error: "Please provide a valid project ID." };
+  }
+
+  try {
+    const { user } = await getAuth();
+    if (!user) {
+      return { error: "Unauthorized" };
+    }
+
+    const project = await db.project.findUnique({
+      where: {
+        id: projectId,
+      },
+    });
+
+    if (!project) {
+      return { error: "Project not found." };
+    }
+    await db.$executeRawUnsafe(`
+      SELECT pg_terminate_backend(pg_stat_activity.pid)
+      FROM pg_stat_activity
+      WHERE pg_stat_activity.datname = '${project.database_name}'
+      AND pid <> pg_backend_pid();
+    `);
+
+    await db.$executeRawUnsafe(
+      `DROP DATABASE IF EXISTS ${project.database_name}`,
+    );
+    await db.queryHistory.deleteMany({
+      where: {
+        project_id: projectId,
+      },
+    });
+    await db.project.delete({
+      where: {
+        id: projectId,
+      },
+    });
+
+    return { success: "Project and associated database deleted successfully." };
+  } catch (error) {
+    console.log(error);
+    return { error: "An error occurred while deleting the project." };
   }
 }
 
