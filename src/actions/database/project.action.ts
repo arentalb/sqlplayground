@@ -16,6 +16,7 @@ import {
   ForeignKeyConstraint,
   TableColumn,
 } from "@/lib/databaseSchemaGenerator";
+import { revalidatePath } from "next/cache";
 
 export async function createProject(project: CreateProjectData) {
   const validatedFields = CreateProjectSchema.safeParse(project);
@@ -46,7 +47,7 @@ export async function createProject(project: CreateProjectData) {
         owner_id: user.id,
       },
     });
-
+    revalidatePath("/dashboard/projects");
     return { success: "Project created successfully", data: newProject };
   } catch (error) {
     if (
@@ -88,7 +89,7 @@ export async function editProject(project: EditProjectData, projectId: string) {
         privacy_status: visibilityText,
       },
     });
-
+    revalidatePath("/dashboard/projects");
     return { success: "Project updated successfully", data: updatedProject };
   } catch (error) {
     return { error: "An error occurred while updating the project" };
@@ -135,6 +136,7 @@ export async function deleteProject(projectId: string) {
       },
     });
 
+    revalidatePath("/dashboard/projects");
     return { success: "Project and associated database deleted successfully." };
   } catch (error) {
     console.log(error);
@@ -226,6 +228,7 @@ export async function cloneProject(project: CloneProjectData) {
 
       return newProject;
     });
+    revalidatePath("/dashboard/projects");
 
     return { success: "Project cloned successfully", data: newProject };
   } catch (error) {
