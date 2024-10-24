@@ -12,6 +12,7 @@ import { DatabaseDigram } from "@/app/(admin)/dashboard/projects/_components/dat
 import ProjectDetail from "@/app/(admin)/dashboard/projects/detail/[id]/_components/projectDetail";
 import { ProjectDetailType } from "@/actions/types";
 import EditProjectDialog from "@/app/(admin)/dashboard/projects/detail/[id]/_components/editProjectDialog";
+import { useRouter } from "next/navigation";
 
 interface PageProps {
   params: { id: string };
@@ -21,28 +22,62 @@ export default function Page({ params }: PageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [project, setProject] = useState<ProjectDetailType | null>();
   const { user } = useAuth();
-
+  const router = useRouter();
   useEffect(() => {
     const fetchProject = async () => {
-      const currentProject = await getProjectDetailById(params.id);
-      setProject(currentProject.data);
-      setIsLoading(false);
+      try {
+        const currentProject = await getProjectDetailById(params.id);
+        setProject(currentProject.data);
+      } catch (error) {
+        console.error("Error fetching project details:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchProject();
+
     return () => {
       setProject(null);
     };
-  }, [params.id, user?.id]);
+  }, [params.id]);
+
+  async function refetch() {
+    setIsLoading(true);
+    try {
+      const currentProject = await getProjectDetailById(params.id);
+      setProject(currentProject.data);
+    } catch (error) {
+      console.error("Error refetching project details:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   if (isLoading) {
     return <ProjectDetailSkeleton />;
   }
-  if (!project) {
-    return;
-  }
-  if (project?.privacy_status !== "PUBLIC" && project?.owner_id !== user?.id) {
-    return <div>this project may be deleted or may be private </div>;
+
+  if (
+    !project ||
+    (project?.privacy_status !== "PUBLIC" && project?.owner_id !== user?.id)
+  ) {
+    return (
+      <div
+        className={"flex w-full h-full justify-center items-center text-2xl"}
+      >
+        <div className={"flex flex-col items-center justify-center"}>
+          <p>this project may be deleted or may be private</p>
+          <Button
+            variant={"destructive"}
+            className={"mt-4"}
+            onClick={() => router.push("/dashboard/projects")}
+          >
+            Go Back{" "}
+          </Button>
+        </div>
+      </div>
+    );
   }
   return (
     <div className="flex-1 flex flex-col ">
@@ -62,7 +97,7 @@ export default function Page({ params }: PageProps) {
                     Play Ground
                   </Link>
                 </Button>
-                <EditProjectDialog project={project} />
+                <EditProjectDialog project={project} refetch={refetch} />
               </>
             ) : (
               <CloneProjectDialog clonedFromProjectId={params.id} />

@@ -1,4 +1,3 @@
-"use client";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -9,21 +8,21 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { EditProjectData, EditProjectSchema } from "@/lib/schemas";
 import { useForm } from "react-hook-form";
-import { deleteProject, editProject } from "@/actions/database/project.action";
 import { Switch } from "@/components/ui/switch";
 import { ProjectDetailType } from "@/actions/types";
 
 export default function EditProjectForm({
   project,
+  onSubmit,
+  onDelete,
 }: {
   project: ProjectDetailType;
+  onSubmit: (values: EditProjectData) => void;
+  onDelete: () => void;
 }) {
-  const { toast } = useToast();
-
   const form = useForm<EditProjectData>({
     resolver: zodResolver(EditProjectSchema),
     defaultValues: {
@@ -32,36 +31,6 @@ export default function EditProjectForm({
       visibility: project.privacy_status === "PUBLIC",
     },
   });
-  async function deleteHandler() {
-    const response = await deleteProject(project.id);
-
-    if (response.success) {
-      toast({
-        title: "Project deleted ",
-        variant: "default",
-      });
-    } else {
-      toast({
-        title: response.error,
-        variant: "destructive",
-      });
-    }
-  }
-  async function onSubmit(values: EditProjectData) {
-    const response = await editProject(values, project.id);
-
-    if (response.success) {
-      toast({
-        title: "Project updated ",
-        variant: "default",
-      });
-    } else {
-      toast({
-        title: response.error,
-        variant: "destructive",
-      });
-    }
-  }
 
   return (
     <Form {...form}>
@@ -73,13 +42,8 @@ export default function EditProjectForm({
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="SuperMarket"
-                  className={"h-12"}
-                  {...field}
-                />
+                <Input placeholder="SuperMarket" className="h-12" {...field} />
               </FormControl>
-
               <FormMessage />
             </FormItem>
           )}
@@ -92,8 +56,8 @@ export default function EditProjectForm({
               <FormLabel>Description</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="This if for supermarkets ..."
-                  className={"h-12"}
+                  placeholder="This is for supermarkets ..."
+                  className="h-12"
                   {...field}
                 />
               </FormControl>
@@ -106,16 +70,14 @@ export default function EditProjectForm({
           name="visibility"
           render={({ field }) => (
             <FormItem>
-              <div className={"flex items-center justify-between"}>
-                <FormLabel>Data Base Visibility</FormLabel>
+              <div className="flex items-center justify-between">
+                <FormLabel>Database Visibility</FormLabel>
                 <FormControl>
-                  <div className="flex items-center justify-between space-x-2">
-                    <Switch
-                      id="visibility"
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </div>
+                  <Switch
+                    id="visibility"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </FormControl>
               </div>
               <FormMessage />
@@ -123,15 +85,15 @@ export default function EditProjectForm({
           )}
         />
 
-        <div className={"flex gap-2"}>
-          <Button type="submit" className={"w-full h-12"}>
+        <div className="flex gap-2">
+          <Button type="submit" className="w-full h-12">
             Edit
           </Button>
           <Button
-            variant={"destructive"}
+            variant="destructive"
             type="button"
-            className={"w-full h-12"}
-            onClick={deleteHandler}
+            className="w-full h-12"
+            onClick={onDelete}
           >
             Delete
           </Button>
