@@ -43,7 +43,6 @@ export async function createProject(project: CreateProjectData) {
         database_name: databaseName,
         title,
         description,
-        database_url: `postgresql://postgres:12345@localhost:5432/${databaseName}`,
         owner_id: user.id,
       },
     });
@@ -199,7 +198,6 @@ export async function cloneProject(project: CloneProjectData) {
           database_name: newDatabaseName,
           title,
           description,
-          database_url: `postgresql://postgres:12345@localhost:5432/${newDatabaseName}`,
           owner_id: user.id,
           cloned_from_project_id: clonedFromProjectId,
           is_cloned: true,
@@ -381,7 +379,7 @@ export async function getDatabaseSchema(dbName: string) {
     currentDB = new PrismaClient({
       datasources: {
         db: {
-          url: `postgresql://postgres:12345@localhost:5432/${dbName}`,
+          url: `${process.env.DATABASE_BASE_URL}${dbName}`,
         },
       },
     });

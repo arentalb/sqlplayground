@@ -37,7 +37,6 @@ model Project {
   title                  String
   description            String
   database_name          String
-  database_url           String
   privacy_status         String         @default("PRIVATE")
   created_at             DateTime       @default(now())
   updated_at             DateTime       @updatedAt

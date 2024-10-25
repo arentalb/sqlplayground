@@ -7,7 +7,7 @@ export async function createTenantPrismaClient(dbName: string) {
     clients[dbName] = new PrismaClient({
       datasources: {
         db: {
-          url: `postgresql://postgres:12345@localhost:5432/${dbName}`,
+          url: `${process.env.DATABASE_BASE_URL}${dbName}`,
         },
       },
     });
