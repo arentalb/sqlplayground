@@ -19,8 +19,8 @@ export default function SideNav() {
 
   return (
     <div
-      className={`hidden sm:flex relative z-10 p-4 h-full flex-col no-scrollbar ${
-        isOpen ? "w-1/6 items-start" : "w-[100px] items-center"
+      className={`hidden md:flex relative z-10 p-4 h-full flex-col no-scrollbar ${
+        isOpen ? "lg:w-1/6 md:w-1/3 items-start" : "sm:w-[100px]  items-center"
       }`}
     >
       <SideNavToggle

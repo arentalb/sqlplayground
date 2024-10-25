@@ -49,8 +49,12 @@ export default function DatabaseHeader() {
   }
 
   return (
-    <div className={"flex justify-between items-center w-full"}>
-      <div className="flex gap-4">
+    <div
+      className={
+        "flex flex-col gap-4 sm:gap-0 sm:flex-row justify-between sm:items-center w-full"
+      }
+    >
+      <div className="flex gap-4 ">
         <div>
           <p className="text-xs text-gray-600 capitalize">Title</p>
           <p>{project?.title}</p>

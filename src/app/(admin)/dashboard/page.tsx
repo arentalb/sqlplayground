@@ -14,7 +14,7 @@ export default async function Page() {
       </FixedHeaderActionsBar>
       <div
         className={
-          "  grid  px-10 py-4 grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-4"
+          "  grid px-4 sm:px-10 py-4 grid-cols-1 md:grid-cols-2  lg:grid-cols-3 gap-4"
         }
       >
         {projects &&

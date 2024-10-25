@@ -86,7 +86,7 @@ export default function Page({ params }: PageProps) {
       <FixedHeaderActionsBar>
         <DatabaseHeader />
       </FixedHeaderActionsBar>
-      <div className="px-10 py-4 flex flex-1 gap-4 overflow-auto   ">
+      <div className="px-4 sm:px-10 py-4 flex flex-1 gap-4 overflow-auto   ">
         <div className="flex  gap-4 w-full max-h-full rounded-lg flex-1">
           <div className="grid grid-cols-1 gap-4 flex-grow flex-1">
             <ResizablePanelGroup direction="vertical">

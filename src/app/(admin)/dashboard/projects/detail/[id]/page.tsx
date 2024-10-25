@@ -105,7 +105,7 @@ export default function Page({ params }: PageProps) {
           </div>
         </div>
       </FixedHeaderActionsBar>
-      <div className="grid grid-cols-1 md:grid-cols-2 h-full px-10 py-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 h-full px-4 sm:px-10  py-4 gap-4">
         <ProjectDetail project={project} />
         <DatabaseDigram databaseName={project?.database_name} />
       </div>

@@ -9,6 +9,7 @@ interface NavLinkProp {
   icon: React.ReactNode;
   classname?: string;
   textShown?: boolean;
+  onClick?: () => void;
 }
 
 export default function NavLink({
@@ -17,12 +18,14 @@ export default function NavLink({
   icon,
   textShown = true,
   classname,
+  onClick,
 }: NavLinkProp) {
   const pathname = usePathname();
   const isActive = pathname === href;
 
   return (
     <Link
+      onClick={onClick}
       href={href}
       className={cn(
         "flex border font-semibold px-4 py-2 bg-gray-100 hover:bg-gray-200 inset-0 dark:bg-gray-900/50 dark:hover:bg-gray-900/70 rounded-md gap-4 box-border",

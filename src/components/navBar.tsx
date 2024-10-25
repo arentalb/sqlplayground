@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth/authProvider";
-import SignOutForm from "@/components/forms/signOutForm";
 import Logo, { LOGO_SIZE } from "@/components/logo";
 
 export default function NavBar() {
@@ -29,9 +28,13 @@ export default function NavBar() {
             </li>
           </>
         ) : (
-          <li>
-            <SignOutForm />
-          </li>
+          <>
+            <li>
+              <Button asChild>
+                <Link href={"/dashboard"}>Dashboard</Link>
+              </Button>
+            </li>
+          </>
         )}
       </ul>
     </div>

@@ -2,8 +2,10 @@ import HeroImage from "@/components/heroImage";
 import NavBar from "@/components/navBar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { getAuth } from "@/lib/auth/getAuth";
 
-export default function Home() {
+export default async function Home() {
+  const { user } = await getAuth();
   return (
     <div className="flex flex-col min-h-screen ">
       <NavBar />
@@ -17,19 +19,30 @@ export default function Home() {
           with the community. Experience SQL like never before with hands-on
           projects and real-time interactions.
         </p>
-        <ul className={" gap-4 flex md:hidden items-center mb-8"}>
-          <li>
-            <Button asChild className={"w-full"}>
-              <Link href={"/signup"}>SIGN UP</Link>
-            </Button>
-          </li>
-          <li className={"text-gray-600"}>Or</li>
-          <li>
-            <Button asChild>
-              <Link href={"/signin"}>SIGN IN</Link>
-            </Button>
-          </li>
+        <ul className="gap-4 flex md:hidden items-center mb-8">
+          {!user ? (
+            <>
+              <li>
+                <Button asChild className="w-full">
+                  <Link href={"/signup"}>SIGN UP</Link>
+                </Button>
+              </li>
+              <li className="text-gray-600">Or</li>
+              <li>
+                <Button asChild>
+                  <Link href={"/signin"}>SIGN IN</Link>
+                </Button>
+              </li>
+            </>
+          ) : (
+            <li>
+              <Button asChild>
+                <Link href={"/dashboard"}>Dashboard</Link>
+              </Button>
+            </li>
+          )}
         </ul>
+
         <HeroImage />
       </div>
     </div>
