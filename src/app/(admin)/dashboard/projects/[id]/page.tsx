@@ -10,7 +10,6 @@ import DatabaseHeader from "@/app/(admin)/dashboard/projects/_components/databas
 import { canConvertToTable } from "@/lib/utils";
 import DatabaseTable from "@/app/(admin)/dashboard/projects/_components/databaseTable";
 import DatabaseTerminal from "@/app/(admin)/dashboard/projects/_components/databaseTerminal";
-import DatabaseHistory from "@/app/(admin)/dashboard/projects/_components/databaseHistory";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -19,6 +18,8 @@ import {
 import { useAuth } from "@/lib/auth/authProvider";
 import { useRouter } from "next/navigation";
 import FixedHeaderActionsBar from "@/app/(admin)/dashboard/projects/_components/fixedHeaderActionsBar";
+import { DatabaseDigram } from "@/app/(admin)/dashboard/projects/_components/databaseDiagram";
+import DatabaseHistory from "@/app/(admin)/dashboard/projects/_components/databaseHistory";
 
 interface PageProps {
   params: { id: string };
@@ -32,11 +33,13 @@ export default function Page({ params }: PageProps) {
     setQuery,
     setTerminalResult,
     setTerminalError,
+    project,
     terminalResult,
   } = useDatabaseStore();
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
   const router = useRouter();
+
   useEffect(() => {
     const fetchProject = async () => {
       const currentProject = await getProjectById(params.id);
@@ -78,26 +81,35 @@ export default function Page({ params }: PageProps) {
     user?.id,
   ]);
 
+  const [currentShownSections, setCurrentShownSections] = useState([
+    "history",
+    "diagram",
+  ]);
+
   if (isLoading) {
     return <ProjectSkeleton />;
   }
+
   return (
-    <div className="flex-1 flex flex-col  overflow-auto">
+    <div className="flex-1 flex flex-col overflow-auto">
       <FixedHeaderActionsBar>
-        <DatabaseHeader />
+        <DatabaseHeader
+          currentShownSections={currentShownSections}
+          setCurrentShownSections={setCurrentShownSections}
+        />
       </FixedHeaderActionsBar>
-      <div className="px-4 sm:px-10 py-4 flex flex-1 gap-4 overflow-auto   ">
-        <div className="flex  gap-4 w-full max-h-full rounded-lg flex-1">
-          <div className="grid grid-cols-1 gap-4 flex-grow flex-1">
+      <div className="px-4 sm:px-10 py-4 flex flex-1 gap-4 overflow-auto">
+        <ResizablePanelGroup direction="horizontal">
+          <ResizablePanel className="flex-1">
             <ResizablePanelGroup direction="vertical">
               <ResizablePanel>
-                <div className="flex items-center justify-center    h-full">
+                <div className="flex items-center justify-center h-full">
                   <DatabaseEditor />
                 </div>
               </ResizablePanel>
-              <ResizableHandle withHandle className={"my-3"} />
+              <ResizableHandle withHandle className="my-3" />
               <ResizablePanel>
-                <div className="flex  items-center justify-center   h-full">
+                <div className="flex items-center justify-center h-full">
                   {canConvertToTable(terminalResult || "") ? (
                     <DatabaseTable />
                   ) : (
@@ -106,11 +118,31 @@ export default function Page({ params }: PageProps) {
                 </div>
               </ResizablePanel>
             </ResizablePanelGroup>
-          </div>
-          <div className=" hidden w-1/3 flex-shrink-0 md:flex items-center justify-center   h-full">
-            <DatabaseHistory />
-          </div>
-        </div>
+          </ResizablePanel>
+
+          {/* Conditional Rendering for Diagram and History */}
+          {currentShownSections.some((section) =>
+            ["diagram", "history"].includes(section),
+          ) && (
+            <>
+              <ResizableHandle withHandle className="mx-3 hidden md:flex" />
+              <ResizablePanel className="hidden md:flex flex-col items-center justify-start h-full w-2/3">
+                <div className="flex flex-1 overflow-auto w-full h-full rounded-b-lg gap-4">
+                  {currentShownSections.includes("diagram") && project && (
+                    <div className="flex-1">
+                      <DatabaseDigram databaseName={project.database_name} />
+                    </div>
+                  )}
+                  {currentShownSections.includes("history") && (
+                    <div className="flex-1">
+                      <DatabaseHistory />
+                    </div>
+                  )}
+                </div>
+              </ResizablePanel>
+            </>
+          )}
+        </ResizablePanelGroup>
       </div>
     </div>
   );
@@ -118,11 +150,11 @@ export default function Page({ params }: PageProps) {
 
 function ProjectSkeleton() {
   return (
-    <div className="px-10 py-6 h-full flex flex-col ">
+    <div className="px-10 py-6 h-full flex flex-col">
       <div className="h-full w-full flex flex-col items-center gap-4">
         <Skeleton className="min-h-[60px] w-full" />
-        <div className={"h-full w-full flex gap-4"}>
-          <div className={"h-full w-full flex gap-4 flex-col"}>
+        <div className="h-full w-full flex gap-4">
+          <div className="h-full w-full flex gap-4 flex-col">
             <Skeleton className="min-h-[150px] w-full" />
             <Skeleton className="h-full w-full" />
           </div>

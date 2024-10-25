@@ -228,10 +228,10 @@ export const DatabaseDigram = ({ databaseName }: { databaseName: string }) => {
   }, [databaseName, setNodes, setEdges]);
 
   return (
-    <div className="relative h-full min-h-[500px] border border-gray-200 rounded-lg shadow-md w-full">
+    <div className="relative h-full min-h-[400px] border border-gray-200 rounded-lg shadow-md w-full  ">
       {isLoading || error ? (
         <>
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center text-white text-xl z-10">
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center text-white text-xl z-10  ">
             {isLoading ? (
               <Loader className={"animate-spin w-8 h-8"} />
             ) : (
