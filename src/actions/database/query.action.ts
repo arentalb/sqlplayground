@@ -4,6 +4,7 @@ import { getAuth } from "@/lib/auth/getAuth";
 import { formatPostgresErrorText, handleBigInt } from "@/lib/utils";
 import { getProjectById } from "@/actions/database/project.action";
 import { storeSqlCodeInHistory } from "@/actions/database/history.action";
+import { isQueryAllowed } from "@/lib/sqlValidator";
 
 export async function runQuery(projectId: string, query: string) {
   try {
@@ -36,7 +37,12 @@ export async function runQuery(projectId: string, query: string) {
     if (!prisma) {
       return { error: "No active database connection found" };
     }
-
+    if (!isQueryAllowed(query, project.data.database_name)) {
+      return {
+        error:
+          "Don't try to be a hacker, haha! If you somehow gain unauthorized access, please let us know!",
+      };
+    }
     try {
       const result = await prisma.$queryRawUnsafe(query);
       const sanitizedResult = handleBigInt(result);
@@ -62,15 +68,20 @@ export async function runQuery(projectId: string, query: string) {
         // @ts-expect-error "i know what field it returns"
         code: error?.meta?.code,
       };
+
+      if (
+        updatedError?.message ===
+        "ERROR: cannot insert multiple commands into a prepared statement"
+      ) {
+        return { error: "Dont run multiple query , Separate them " };
+      }
       const executedSql = await storeSqlCodeInHistory(
         projectId,
         query,
         "ERROR",
       );
-      console.log(error?.toString());
       return {
         success: "Query execution failed.",
-
         data: {
           isQuerySuccessful: false,
           oldQuery: formatPostgresErrorText(updatedError),
